@@ -1,15 +1,33 @@
 {
   "name": "equipment",
   "version": "1.0.0",
+  "private": true,
   "description": "",
-  "main": "index.js",
+  "author": "",
   "scripts": {
+    "serve": "vue-cli-service serve",
+    "server": "node server/src/index.js",
+    "mon": "nodemon server/src/index.js",
+    "build": "vue-cli-service build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "main": "indexExample.js",
   "dependencies": {
+    "@hapi/hapi": "^19.1.1",
+    "axios": "^0.19.2",
     "docx-templates": "^3.1.1",
-    "read-excel-file": "^4.0.5"
-  }
+    "exit-hook": "^2.2.0",
+    "nodemon": "^2.0.2",
+    "read-excel-file": "^4.0.6",
+    "vue": "^2.6.11"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "~4.2.0",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^8.0.2",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "_id": "equipment@1.0.0",
+  "license": "ISC",
+  "readme": "ERROR: No README data found!"
 }
