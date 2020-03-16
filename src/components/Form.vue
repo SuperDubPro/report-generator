@@ -29,6 +29,7 @@
 <script>
 	// import createReport from 'docx-templates';
 	import axios from 'axios';
+	import bus from '../bus';
 
 	export default {
 		name: "Form",
@@ -36,7 +37,7 @@
 			return {
 				templateFile: null,
 				data: {
-					equipmentName: 'Супер-пупер оборудование00',
+					equipmentName: 'Супер-пупер оборудование',
 					objectAddress: 'Москва, Ереванская 24',
 					consumerOrganization: 'ООО Рога и копыта',
 					contract:{
@@ -67,7 +68,8 @@
 			}
 		},
 		async mounted() {
-			await this.setFilesArr()
+			await this.setFilesArr();
+			bus.$emit('filesArr', this.filesArr);
 		}
 	}
 </script>
@@ -88,7 +90,7 @@
 			width: 100%;
 			margin: 8px 0 8px 0;
 			input {
-				width: 60%;
+				width: 80%;
 				margin: 8px 0 8px 0;
 			}
 		}
