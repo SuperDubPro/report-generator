@@ -3,10 +3,10 @@ const fs = require('fs');
 
 let outputDirPath = './server/src/reports';
 
-async function makeReport(data) {
+async function makeReport(name, data) {
 	await createReport({
 		template: './server/src/templates/template.docx',
-		output: outputDirPath + '/myNewReport.docx',
+		output: `${outputDirPath}/${name}`,
 		data
 	}).catch(err => console.log(err))
 }

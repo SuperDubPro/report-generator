@@ -21,6 +21,10 @@
 				Имя клиента:
 				<input v-model="data.contract.person">
 			</label>
+			<label>
+				Название файла:
+				<input v-model="fileName">
+			</label>
 			<button @click="handleButtonCLick">Создать отчет</button>
 		</form>
 	</div>
@@ -45,7 +49,9 @@
 						person: 'Иванов Петр Кузьмич'
 					}
 				},
-				filesArr: []
+				fileName: "AnotherReport.docx",
+				filesArr: [],
+				file: []
 			}
 		},
 		computed: {
@@ -55,12 +61,25 @@
 			handleTemplateChange(e) {
 				this.$set(this, 'templateFile', e.target.files[0]);
 			},
-			handleButtonCLick() {
-				axios({
-					method: 'post',
-					url: 'http://localhost:3001/',
-					data: this.data
-				})
+			async handleButtonCLick() {
+				// const res = await axios({
+				// 	method: 'post',
+				// 	url: 'http://localhost:3001/',
+				// 	data: {
+				// 		name: this.fileName,
+				// 		data: this.data
+				// 	}
+				// });
+				// this.$set(this, 'filesArr', res.data);
+				// bus.$emit('filesArr', res.data);
+				const resp = await axios.get('http://localhost:3001/').then(res => {
+					console.log(res);
+					this.$set(this, 'file', res);
+				}).catch(function(err){
+					this.error = err;
+					console.log(err)
+				});
+				console.log("resp", resp);
 			},
 			async setFilesArr() {
 				const res = await axios.get('http://localhost:3001/');
@@ -68,8 +87,8 @@
 			}
 		},
 		async mounted() {
-			await this.setFilesArr();
-			bus.$emit('filesArr', this.filesArr);
+			// await this.setFilesArr();
+			// bus.$emit('filesArr', this.filesArr);
 		}
 	}
 </script>
