@@ -60,16 +60,17 @@ export default class Form extends React.Component {
 		})
 	}
 
-	async sendParams() {
-		return new Promise((resolve, reject) => {
-			resolve(axios({
+	sendParams() {
+		return axios({
 				method: 'post',
-				url: 'http://localhost:3000/generateReport',
+				url: '/generateReport',
 				data: {
 					data: this.state.data,
 					fileName: 'MyReport'
 				}
-			}));
+			}).then(res=> {
+				console.log(res);
+				return res;
 		});
 	}
 
@@ -97,8 +98,8 @@ export default class Form extends React.Component {
 		return (
 			<section>
 				<div className='form-wrapper'>
-					<form>
-						<a href="/saveReport" download> ссылка </a>
+					<div>
+						{/*<a href="/saveReport" download> ссылка </a>*/}
 						{
 							this.params.map(param => {
 								// console.log(this.state[param.key])
@@ -114,8 +115,8 @@ export default class Form extends React.Component {
 							Название файла:
 							<input onChange={e => this.handleFileNameChange(e)} value={this.state.fileName}/>
 						</label>
-						<button onClick={e => this.getReport()}>Создать отчет</button>
-					</form>
+						<button onClick={e => this.getReport()} type="button">Создать отчет</button>
+					</div>
 				</div>
 				<div className='files-list-wrapper'>
 					<div id="files-list">
