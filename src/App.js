@@ -1,14 +1,12 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { default as Form } from './components/Form'
+
+import { default as Form } from './components/Form';
+import { default as Header } from './components/Header';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-      </header>
+      <Header> </Header>
       <Form> </Form>
     </div>
   );

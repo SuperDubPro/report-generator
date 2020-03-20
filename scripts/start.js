@@ -13,10 +13,8 @@ process.on('unhandledRejection', err => {
 
 // Ensure environment variables are read.
 require('../config/env');
-
-// const express = require('express');
-// const cors = require('cors');
-// let app = express();
+const actions = require('./actions');
+const bodyParser = require('body-parser');
 const fs = require('fs');
 const chalk = require('react-dev-utils/chalk');
 const webpack = require('webpack');
@@ -121,9 +119,6 @@ checkBrowsers(paths.appPath, isInteractive)
     );
     const devServer = new WebpackDevServer(compiler, serverConfig);
 
-    // console.log(devServer.use)
-
-
     // devServer.use(cors());
     // const corsOptions = {
     //   origin: '*',
@@ -134,8 +129,19 @@ checkBrowsers(paths.appPath, isInteractive)
     //   // res.download(__dirname+'\\build.js');
     // });
 
-    devServer.use('/qwerty', function (req, res) {
-      res.sendFile(__dirname+'\\reports\\myReport.docx');
+    devServer.use(bodyParser.json());       // to support JSON-encoded bodies
+    devServer.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+      extended: true
+    }));
+
+    devServer.use('/generateReport', async function (req, res) {
+      await actions.generateReport(req.body.fileName, req.body.data);
+      res.send('Report generated!');
+    });
+
+    devServer.use('/saveReport', function (req, res) {
+      console.log("saveReport", __dirname);
+      res.sendFile(__dirname+'\\reports\\MyReport.docx');
     });
 
     // Launch WebpackDevServer.
