@@ -119,16 +119,6 @@ checkBrowsers(paths.appPath, isInteractive)
     );
     const devServer = new WebpackDevServer(compiler, serverConfig);
 
-    // devServer.use(cors());
-    // const corsOptions = {
-    //   origin: '*',
-    //   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-    // }
-
-    // devServer.app.get('/', function (req, res) {
-    //   // res.download(__dirname+'\\build.js');
-    // });
-
     devServer.use(bodyParser.json());       // to support JSON-encoded bodies
     devServer.use(bodyParser.urlencoded({     // to support URL-encoded bodies
       extended: true

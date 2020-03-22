@@ -1,6 +1,6 @@
 const params = [
 	{
-		name: 'Название оборудования',
+		name: 'Наименование оборудования',
 		key: 'equipmentName'
 	},
 	{

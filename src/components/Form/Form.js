@@ -10,10 +10,13 @@ export default class Form extends React.Component {
 		this.state = {
 			data: {},
 			fileName: "MyReport",
-			filesList: ["121212","2121231242"]
+			filesList: ["121212","2111111111111111111121231242"],
+			disableButton: true,
+			wrongFileName: null
 		};
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.handleFileNameChange = this.handleFileNameChange.bind(this);
+		this.setButtonStatus = this.setButtonStatus.bind(this);
 	}
 
 	componentDidMount() {
@@ -21,27 +24,10 @@ export default class Form extends React.Component {
 		this.params.forEach(param => {
 			data[param.key] = undefined
 		});
+		// const disableButton = !this.isDataValid();
 		this.setState({
 			data
 		})
-		// axios
-		// 	.get('http://localhost:3000/qwerty')
-		// 	.then(res => {
-		// 		console.log(res);
-		// 		let blob = new Blob([res.data], { type: 'application/docx' });
-		// 		console.log(blob);
-		// 		const url = window.URL.createObjectURL(blob);
-		// 		const a = document.createElement('a');
-		// 		a.style.display = 'none';
-		// 		a.href = url;
-		// 		a.download = 'report';
-		// 		document.body.appendChild(a);
-		// 		console.log(a)
-		// 		a.click();
-		// 		window.URL.revokeObjectURL(url);
-		// 		document.body.removeChild(a);
-		// 	})
-		// .catch(error => new error(error));
 	}
 
 	handleInputChange(e) {
@@ -49,15 +35,18 @@ export default class Form extends React.Component {
 		let data = this.state.data;
 		data[key] = e.target.value;
 
-		this.setState({
-			data
-		});
+		this.setState({data});
 	}
 
 	handleFileNameChange(e) {
-		this.setState({
-			fileName: e.target.value
-		})
+		this.setState(
+			{
+				fileName: e.target.value
+			},
+			() => {
+				this.setButtonStatus()
+			}
+		)
 	}
 
 	sendParams() {
@@ -69,7 +58,6 @@ export default class Form extends React.Component {
 					fileName: 'MyReport'
 				}
 			}).then(res=> {
-				console.log(res);
 				return res;
 		});
 	}
@@ -79,7 +67,6 @@ export default class Form extends React.Component {
 		const a = document.createElement('a');
 		a.style.display = 'none';
 		a.href = url;
-		// a.download = `MyReport.docx`;
 		a.download = `${this.state.fileName}.docx`;
 		document.body.appendChild(a);
 		a.click();
@@ -89,10 +76,35 @@ export default class Form extends React.Component {
 
 	async getReport() {
 		await this.sendParams().then(res => {
-			console.log(res);
 			this.saveReport();
 		});
 	}
+
+	isDataValid() {
+		const data = this.state.data;
+		return Object.keys(data).every(key => {
+			const val = data[key];
+			return val !== null && val !== undefined && val.trim() !== ''
+		});
+	}
+
+	setButtonStatus() {
+		let disableButton = !this.isDataValid();
+		const isValidName = this.isValidFileName();
+		console.log({disableButton, isValidName});
+		if (!isValidName) disableButton = true;
+		if(this.state.disableButton !== disableButton) {
+			this.setState({disableButton});
+		}
+	}
+
+	isValidFileName() {
+		const name = this.state.fileName;
+		const rg1=/^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
+		const rg2=/^\./; // cannot start with dot (.)
+		const rg3=/^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+		return rg1.test(name)&&!rg2.test(name)&&!rg3.test(name);
+	};
 
 	render() {
 		return (
@@ -102,33 +114,54 @@ export default class Form extends React.Component {
 						{/*<a href="/saveReport" download> ссылка </a>*/}
 						{
 							this.params.map(param => {
-								// console.log(this.state[param.key])
 								return (
 									<label key={`${param.key}Label`}>
 										{param.name}:
-										<input key={param.key} name={param.key} onChange={e => this.handleInputChange(e)} value={this.state.data[param.key] || ''}/>
+										<input
+											key={param.key}
+											name={param.key}
+											onChange={e => {
+												this.handleInputChange(e);
+												this.setButtonStatus();
+											}}
+											value={this.state.data[param.key] || ''}/>
 									</label>
 								)
 							})
 						}
 						<label>
 							Название файла:
-							<input onChange={e => this.handleFileNameChange(e)} value={this.state.fileName}/>
+							<input
+								className={this.isValidFileName() ? null : 'not-valid'}
+								onChange={e => {
+									this.handleFileNameChange(e);
+								}}
+								value={this.state.fileName}
+							/>
 						</label>
-						<button onClick={e => this.getReport()} type="button">Создать отчет</button>
+						<button
+							onClick={e => this.getReport()}
+							type="button"
+							disabled={this.state.disableButton}
+						>
+							Создать отчет
+						</button>
 					</div>
 				</div>
-				<div className='files-list-wrapper'>
-					<div id="files-list">
-						{
-							this.state.filesList.map(file => {
-								return (
-									<div className='file' key={file}> {file} </div>
-								)
-							})
-						}
-					</div>
-				</div>
+				{/*<div className='files-list-wrapper'>*/}
+				{/*	<div id="files-list">*/}
+				{/*		{*/}
+				{/*			this.state.filesList.map(file => {*/}
+				{/*				return (*/}
+				{/*					<div className='file' key={file}>*/}
+				{/*						<div className="text">{file}</div>*/}
+				{/*						<div className="icon">x</div>*/}
+				{/*					</div>*/}
+				{/*				)*/}
+				{/*			})*/}
+				{/*		}*/}
+				{/*	</div>*/}
+				{/*</div>*/}
 			</section>
 		)
 	}
