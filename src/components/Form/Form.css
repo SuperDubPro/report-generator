@@ -1,0 +1,108 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+section {
+  display: flex;
+  flex-direction: row;
+  margin: 24px 0 16px 200px;
+}
+section .form-wrapper {
+  width: 65%;
+}
+section .form-wrapper div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  margin: auto;
+}
+section .form-wrapper div label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin: 8px 0 8px 0;
+}
+section .form-wrapper div label input {
+  width: 80%;
+  height: 24px;
+  border: 2px solid #868D9A;
+  border-radius: 4px;
+  margin: 8px 0 8px 0;
+  outline: none;
+  padding-left: 16px;
+  transition: 0.3s;
+}
+section .form-wrapper div label input:focus {
+  border-color: #61dafb;
+}
+section .form-wrapper div button {
+  width: 120px;
+  margin: 16px 0 8px 0;
+  border: 2px solid #61dafb;
+  border-radius: 4px;
+  outline: none;
+  height: 24px;
+  background: #61dafb;
+  transition: 0.3s;
+  cursor: pointer;
+  user-select: none;
+}
+section .form-wrapper div button:focus {
+  border-color: #61dafb;
+}
+section .form-wrapper div button:disabled {
+  border: 2px solid #868D9A;
+  background: unset;
+  cursor: not-allowed;
+}
+section .form-wrapper .not-valid {
+  border-color: #d02237 !important;
+}
+section .files-list-wrapper #files-list {
+  width: 200px;
+  height: 480px;
+  border: #868D9A solid 2px;
+  border-radius: 4px;
+  padding: 4px 24px 4px 8px;
+  overflow-y: auto;
+}
+section .files-list-wrapper #files-list .file {
+  overflow: hidden;
+  width: 200px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+section .files-list-wrapper #files-list .file:hover .text {
+  color: #61dafb;
+}
+section .files-list-wrapper #files-list .file:hover .icon {
+  display: inherit;
+  color: #d02237;
+  fill: #d02237;
+  opacity: 1;
+}
+section .files-list-wrapper #files-list .file .text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: 0.3s;
+}
+section .files-list-wrapper #files-list .file .icon {
+  opacity: 0;
+  transition: 0.3s;
+  user-select: none;
+  cursor: pointer;
+}
+
+/*# sourceMappingURL=Form.css.map */

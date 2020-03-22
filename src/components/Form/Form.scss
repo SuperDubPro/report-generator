@@ -1,0 +1,105 @@
+@import '../../index';
+
+section {
+	display: flex;
+	flex-direction: row;
+	margin: 24px 0 16px 200px;
+
+	.form-wrapper {
+		width: 65%;
+		div {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: flex-start;
+			margin: auto;
+			label {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: flex-start;
+				width: 100%;
+				margin: 8px 0 8px 0;
+				input {
+					width: 80%;
+					height: 24px;
+					border: 2px solid $react-light;
+					border-radius: 4px;
+					margin: 8px 0 8px 0;
+					outline: none;
+					padding-left: 16px;
+					transition: 0.3s;
+					&:focus {
+						border-color: $react-turquoise;
+					}
+				}
+			}
+			button {
+				width: 120px;
+				margin: 16px 0 8px 0;
+				border: 2px solid $react-turquoise;
+				border-radius: 4px;
+				outline: none;
+				height: 24px;
+				background: $react-turquoise;
+				transition: 0.3s;
+				cursor: pointer;
+				user-select: none;
+				&:focus {
+					border-color: $react-turquoise;
+				}
+				&:disabled {
+					border: 2px solid $react-light;
+					background: unset;
+					cursor: not-allowed;
+				}
+			}
+		}
+
+		.not-valid {
+			border-color: $red !important;
+		}
+	}
+
+	.files-list-wrapper {
+		#files-list {
+			width: 200px;
+			height: 480px;
+			border: $react-light solid 2px;
+			border-radius: 4px;
+			padding: 4px 24px 4px 8px;
+			overflow-y: auto;
+			.file {
+				overflow: hidden;
+				width: 200px;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: space-between;
+				&:hover {
+					.text {
+						color: $react-turquoise;
+					}
+					.icon {
+						display: inherit;
+						color: $red;
+						fill: $red;
+						opacity: 1;
+					}
+				}
+				.text {
+					overflow: hidden;
+					text-overflow: ellipsis;
+					transition: .3s;
+				}
+				.icon {
+					//display: none;
+					opacity: 0;
+					transition: .3s;
+					user-select: none;
+					cursor: pointer;
+				}
+			}
+		}
+	}
+}
