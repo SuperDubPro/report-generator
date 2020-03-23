@@ -76,7 +76,8 @@ export default class Form extends React.Component {
 
 	async getReport() {
 		await this.sendParams().then(res => {
-			this.saveReport();
+			setTimeout(()=>this.saveReport(),2000)
+
 		});
 	}
 
