@@ -2,6 +2,9 @@ import React from 'react';
 import './Form.scss';
 import params from "./reportParams";
 import axios from 'axios';
+import JSZip from 'jszip';
+import saveAs from 'file-saver';
+
 
 export default class Form extends React.Component {
 	constructor(props) {
@@ -76,9 +79,22 @@ export default class Form extends React.Component {
 
 	async getReport() {
 		await this.sendParams().then(res => {
-			setTimeout(()=>this.saveReport(),2000)
-
+			this.saveReport();
 		});
+		// await this.sendParams().then(res => {
+		// 	let zip = new JSZip();
+		// 	// console.log(res.data);
+		// 	console.log(res);
+		// 	const fileName = `${this.state.fileName}.docx`;
+		// 	let blob = new Blob([res.data], {type: res.headers['content-type']});
+		// 	zip.file(fileName, res.data);
+		// 	zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
+		// 		saveAs(blob, "report.zip");                          // 2) trigger the download
+		// 	}, function (err) {
+		// 		new Error(err);
+		// 	});
+		// 	saveAs(res.data, fileName)
+		// })
 	}
 
 	isDataValid() {
@@ -100,9 +116,9 @@ export default class Form extends React.Component {
 
 	isValidFileName() {
 		const name = this.state.fileName;
-		const rg1=/^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
-		const rg2=/^\./; // cannot start with dot (.)
-		const rg3=/^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+		const rg1 = /^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
+		const rg2 = /^\./; // cannot start with dot (.)
+		const rg3 = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
 		return rg1.test(name)&&!rg2.test(name)&&!rg3.test(name);
 	};
 

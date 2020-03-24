@@ -125,8 +125,13 @@ checkBrowsers(paths.appPath, isInteractive)
     }));
 
     devServer.use('/generateReport', async function (req, res) {
-      await actions.generateReport(req.body.fileName, req.body.data);
-      res.send('Report generated!');
+      actions.generateReport(req.body.data).then(val => {
+        // console.log(val.toString('base64'));
+        // const base64Data = val.toString('base64');
+        // res.send(base64Data)
+        // res.sendFile(__dirname+'\\reports\\MyReport.docx')
+        res.send("Success!");
+      });
     });
 
     devServer.use('/saveReport', function (req, res) {
