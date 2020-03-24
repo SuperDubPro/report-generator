@@ -2,9 +2,6 @@ import React from 'react';
 import './Form.scss';
 import params from "./reportParams";
 import axios from 'axios';
-import JSZip from 'jszip';
-import saveAs from 'file-saver';
-
 
 export default class Form extends React.Component {
 	constructor(props) {
@@ -81,20 +78,6 @@ export default class Form extends React.Component {
 		await this.sendParams().then(res => {
 			this.saveReport();
 		});
-		// await this.sendParams().then(res => {
-		// 	let zip = new JSZip();
-		// 	// console.log(res.data);
-		// 	console.log(res);
-		// 	const fileName = `${this.state.fileName}.docx`;
-		// 	let blob = new Blob([res.data], {type: res.headers['content-type']});
-		// 	zip.file(fileName, res.data);
-		// 	zip.generateAsync({type:"blob"}).then(function (blob) { // 1) generate the zip file
-		// 		saveAs(blob, "report.zip");                          // 2) trigger the download
-		// 	}, function (err) {
-		// 		new Error(err);
-		// 	});
-		// 	saveAs(res.data, fileName)
-		// })
 	}
 
 	isDataValid() {

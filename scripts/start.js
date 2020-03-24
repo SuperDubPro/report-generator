@@ -135,8 +135,8 @@ checkBrowsers(paths.appPath, isInteractive)
     });
 
     devServer.use('/saveReport', function (req, res) {
-      console.log("saveReport", __dirname);
-      res.sendFile(__dirname+'\\reports\\MyReport.docx');
+      // console.log("saveReport", __dirname);
+      res.sendFile(__dirname + '/reports/MyReport.docx');
     });
 
     // Launch WebpackDevServer.
