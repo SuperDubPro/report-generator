@@ -2,6 +2,7 @@ import React from 'react';
 import './Form.scss';
 import params from "./reportParams";
 import axios from 'axios';
+import { default as Icon } from '../Icon';
 
 export default class Form extends React.Component {
 	constructor(props) {
@@ -10,7 +11,7 @@ export default class Form extends React.Component {
 		this.state = {
 			data: {},
 			fileName: "MyReport",
-			filesList: ["121212","2111111111111111111121231242"],
+			storage: {},
 			disableButton: true,
 			wrongFileName: null
 		};
@@ -24,10 +25,11 @@ export default class Form extends React.Component {
 		this.params.forEach(param => {
 			data[param.key] = undefined
 		});
-		// const disableButton = !this.isDataValid();
-		this.setState({
-			data
-		})
+		this.setState({ data });
+
+		this.getStorage().then(res => {
+			this.setState({ storage: res })
+		});
 	}
 
 	handleInputChange(e) {
@@ -49,21 +51,67 @@ export default class Form extends React.Component {
 		)
 	}
 
-	sendParams() {
+	handleNameClick(e) {
+		const fileId = e.target.id;
+		const file = this.state.storage[fileId];
+		this.setState({
+			data: file.data,
+			fileName: file.fileName
+		});
+	}
+
+	generateReport() {
 		return axios({
 				method: 'post',
 				url: '/generateReport',
 				data: {
+					// id: Date.now(),
 					data: this.state.data,
-					fileName: 'MyReport'
+					// fileName: 'MyReport',
 				}
 			}).then(res=> {
 				return res;
 		});
 	}
 
-	saveReport() {
-		const url = '/saveReport';
+	getStorage() {
+		return axios.get('/storage').then(res => {
+			return res.data;
+		});
+	}
+
+	saveParams(){
+		axios({
+			method: 'post',
+			url: '/saveParams',
+			data: {
+				id: Date.now(),
+				data: this.state.data,
+				fileName: this.state.fileName,
+			}
+		}).then(res=> {
+			this.setState({
+				storage: res.data
+			});
+		});
+	}
+
+	deleteParams(e) {
+		axios({
+			method: 'post',
+			url: '/deleteParams',
+			data: {
+				id: e.target.id,
+			}
+		}).then(res=> {
+			this.setState({
+				storage: res.data
+			});
+		});
+	}
+
+	downloadReport() {
+		const url = '/downloadReport';
 		const a = document.createElement('a');
 		a.style.display = 'none';
 		a.href = url;
@@ -74,9 +122,9 @@ export default class Form extends React.Component {
 		document.body.removeChild(a);
 	}
 
-	async getReport() {
-		await this.sendParams().then(res => {
-			this.saveReport();
+	getReport() {
+		this.generateReport().then(res => {
+			this.downloadReport();
 		});
 	}
 
@@ -99,18 +147,18 @@ export default class Form extends React.Component {
 
 	isValidFileName() {
 		const name = this.state.fileName;
-		const rg1 = /^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
+		const rg1 = /^[^\\/:*?"<>|]+$/; // forbidden characters \ / : * ? " < > |
 		const rg2 = /^\./; // cannot start with dot (.)
 		const rg3 = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
 		return rg1.test(name)&&!rg2.test(name)&&!rg3.test(name);
 	};
 
 	render() {
+		const storage = this.state.storage;
 		return (
 			<section>
 				<div className='form-wrapper'>
 					<div>
-						{/*<a href="/saveReport" download> ссылка </a>*/}
 						{
 							this.params.map(param => {
 								return (
@@ -138,29 +186,50 @@ export default class Form extends React.Component {
 								value={this.state.fileName}
 							/>
 						</label>
-						<button
-							onClick={e => this.getReport()}
-							type="button"
-							disabled={this.state.disableButton}
-						>
-							Создать отчет
-						</button>
+						<div className='button-block'>
+							<button
+								onClick={e => this.getReport()}
+								type='button'
+								disabled={this.state.disableButton}
+							>
+								Создать отчет
+							</button>
+							<button
+								onClick={e => this.saveParams()}
+								type='button'
+								disabled={this.state.disableButton}
+							>
+								Сохранить параметры
+							</button>
+						</div>
 					</div>
 				</div>
-				{/*<div className='files-list-wrapper'>*/}
-				{/*	<div id="files-list">*/}
-				{/*		{*/}
-				{/*			this.state.filesList.map(file => {*/}
-				{/*				return (*/}
-				{/*					<div className='file' key={file}>*/}
-				{/*						<div className="text">{file}</div>*/}
-				{/*						<div className="icon">x</div>*/}
-				{/*					</div>*/}
-				{/*				)*/}
-				{/*			})*/}
-				{/*		}*/}
-				{/*	</div>*/}
-				{/*</div>*/}
+				<div className='files-list-wrapper'>
+					<div id="files-list">
+						{
+							Object.keys(storage).map(file => {
+								return (
+									<div className='file' key={storage[file].id}>
+										<div
+											className="text"
+											id={storage[file].id}
+											onClick={e => this.handleNameClick(e)}
+										>
+											{storage[file].fileName}
+										</div>
+										<div
+											className="icon"
+											id={storage[file].id}
+											onClick={e => {this.deleteParams(e)}}
+										>
+											<Icon name='cross' />
+										</div>
+									</div>
+								)
+							})
+						}
+					</div>
+				</div>
 			</section>
 		)
 	}

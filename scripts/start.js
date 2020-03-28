@@ -125,18 +125,69 @@ checkBrowsers(paths.appPath, isInteractive)
     }));
 
     devServer.use('/generateReport', async function (req, res) {
-      actions.generateReport(req.body.data).then(val => {
-        // console.log(val.toString('base64'));
-        // const base64Data = val.toString('base64');
-        // res.send(base64Data)
-        // res.sendFile(__dirname+'\\reports\\MyReport.docx')
+      const body = req.body;
+      // fs.writeFile(
+      //   `${__dirname}/storage/${req.body.id}.json`,
+      //   JSON.stringify(body),
+      //   'utf8',
+      //   (err) => {
+      //     if (err) throw err;
+      //     console.log('The file has been saved!');
+      //   }
+      // );
+      actions.generateReport(body.data).then(val => {
         res.send("Success!");
       });
     });
 
-    devServer.use('/saveReport', function (req, res) {
-      // console.log("saveReport", __dirname);
+    devServer.use('/downloadReport', function (req, res) {
       res.sendFile(__dirname + '/reports/MyReport.docx');
+    });
+    
+    devServer.use('/storage', function (req, res) {
+      fs.readFile(`${__dirname}/storage/storage.json`, (err, data) => {
+        if (err) throw err;
+        const storage = JSON.parse(data);
+        res.send(storage);
+      });
+    });
+
+    devServer.use('/saveParams', function (req, res) {
+      fs.readFile(`${__dirname}/storage/storage.json`, (err, data) => {
+        if (err) throw err;
+        let storage = JSON.parse(data);
+        storage[`${req.body.id}`] = req.body;
+
+        fs.writeFile(
+          `${__dirname}/storage/storage.json`,
+          JSON.stringify(storage),
+          'utf8',
+          (err) => {
+            if (err) throw err;
+          }
+        );
+
+        res.send(storage);
+      });
+    });
+
+    devServer.use('/deleteParams', function (req, res) {
+      fs.readFile(`${__dirname}/storage/storage.json`, (err, data) => {
+        if (err) throw err;
+        let storage = JSON.parse(data);
+        delete storage[`${req.body.id}`];
+
+        fs.writeFile(
+          `${__dirname}/storage/storage.json`,
+          JSON.stringify(storage),
+          'utf8',
+          (err) => {
+            if (err) throw err;
+          }
+        );
+
+        res.send(storage);
+      });
     });
 
     // Launch WebpackDevServer.

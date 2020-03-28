@@ -13,14 +13,6 @@ function generateReport(data) {
 			data
 		}).catch(err => rej(err)))
 	})
-
-	// const buffer = await createReport({
-	// 	template: './scripts/templates/template.docx',
-	// 	output: `${outputDirPath}/${name}.docx`,
-	// 	data
-	// }).catch(err => console.log(err)).then(val => console.log(val));
-	// console.log(buffer);
-	// return buffer
 }
 
 function getFilesArr() {

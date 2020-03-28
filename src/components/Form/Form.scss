@@ -34,9 +34,16 @@ section {
 					}
 				}
 			}
+			.button-block {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: flex-start;
+				margin: unset;
+			}
 			button {
-				width: 120px;
-				margin: 16px 0 8px 0;
+				min-width: 120px;
+				margin: 16px 16px 16px 0;
 				border: 2px solid $react-turquoise;
 				border-radius: 4px;
 				outline: none;
@@ -91,11 +98,13 @@ section {
 					overflow: hidden;
 					text-overflow: ellipsis;
 					transition: .3s;
+					user-select: none;
+					cursor: pointer;
 				}
 				.icon {
 					//display: none;
 					opacity: 0;
-					transition: .3s;
+					transition: .1s;
 					user-select: none;
 					cursor: pointer;
 				}
