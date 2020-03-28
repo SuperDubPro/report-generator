@@ -3,16 +3,17 @@
 section {
 	display: flex;
 	flex-direction: row;
-	margin: 24px 0 16px 200px;
+	margin: 24px 10% 16px 16%;
+	justify-content: space-between;
 
 	.form-wrapper {
-		width: 65%;
+		width: 55%;
 		div {
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
 			align-items: flex-start;
-			margin: auto;
+			//margin: auto;
 			label {
 				display: flex;
 				flex-direction: column;
@@ -21,7 +22,7 @@ section {
 				width: 100%;
 				margin: 8px 0 8px 0;
 				input {
-					width: 80%;
+					width: 100%;
 					height: 24px;
 					border: 2px solid $react-light;
 					border-radius: 4px;
@@ -37,9 +38,10 @@ section {
 			.button-block {
 				display: flex;
 				flex-direction: row;
-				align-items: center;
+				align-items: stretch;
 				justify-content: flex-start;
 				margin: unset;
+				width: 100%;
 			}
 			button {
 				min-width: 120px;
@@ -47,7 +49,7 @@ section {
 				border: 2px solid $react-turquoise;
 				border-radius: 4px;
 				outline: none;
-				height: 24px;
+				min-height: 24px;
 				background: $react-turquoise;
 				transition: 0.3s;
 				cursor: pointer;
@@ -69,17 +71,19 @@ section {
 	}
 
 	.files-list-wrapper {
+		width: 20%;
+		margin: 32px 10% 0 4px;
+
 		#files-list {
-			width: 200px;
+			width: 100%;
 			height: 448px;
 			border: $react-light solid 2px;
 			border-radius: 4px;
-			margin-top: 32px;
 			padding: 4px 18px 4px 16px;
 			overflow-y: auto;
 			.file {
 				overflow: hidden;
-				width: 200px;
+				width: 100%;
 				display: flex;
 				flex-direction: row;
 				align-items: center;
