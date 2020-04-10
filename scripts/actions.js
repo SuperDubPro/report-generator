@@ -1,5 +1,7 @@
 const createReport = require('docx-templates');
 const fs = require('fs');
+const xlsxTemplate = require('xlsx-template');
+
 
 let outputDirPath = './scripts/reports';
 
@@ -7,24 +9,50 @@ function generateReport(data) {
 	return new Promise((res, rej) => {
 		res(createReport({
 			template: './scripts/templates/template.docx',
-			// output: 'buffer', MyReport
-			// output: `${outputDirPath}/${name}.docx`,
 			output: `${outputDirPath}/MyReport.docx`,
 			data
 		}).catch(err => rej(err)))
 	})
 }
 
-function getFilesArr() {
-	return new Promise((res,rej) => {
-		fs.readdir(outputDirPath, (err, files) => {
-			if (err) rej(err);
-			else res(files);
+function generateXlsx(data) {
+	// Load an XLSX file into memory
+	// console.log("!!!",__dirname);
+	return new Promise( (res, rej) => {
+		fs.readFile(__dirname + '/templates/template1.xlsx', function(err, file) {
+			if(err) rej(err);
+			// Create a template
+			const template = new xlsxTemplate(file);
+
+			// Replacements take place on first sheet
+			let sheetNumber = 1;
+
+			// Set up some placeholder values matching the placeholders in the template
+			// const values = {
+			// 	extractDate: new Date(),
+			// 	dates: [ new Date("2013-06-01"), new Date("2013-06-02"), new Date("2013-06-03") ],
+			// 	people: [
+			// 		{name: "John Smith", age: 20},
+			// 		{name: "Bob Johnson", age: 22}
+			// 	]
+			// };
+
+			// Perform substitution
+			template.substitute(sheetNumber, data);
+
+			// Get binary data
+			// const data = template.generate({type: 'uint8array'});
+			let xlsxBuffer = template.generate();
+			fs.writeFile(__dirname + '/reports/MyXLSX.xlsx', xlsxBuffer, 'binary', (err)=>{
+				if (err) throw err;
+				res("xlsx success!")
+			});
+			// res(xlsxData);
 		});
-	})
+	});
 }
 
 module.exports = {
 	generateReport,
-	getFilesArr
+	generateXlsx
 };

@@ -1,0 +1,41 @@
+@import '../../index';
+
+table {
+	width: 80%;
+	border: 2px solid $react-light;
+	margin: auto;
+	border-collapse: collapse;
+	thead {
+		border: inherit;
+	}
+	tbody {
+		border: inherit;
+	}
+	tfoot {
+		border: inherit;
+	}
+	tr {
+		border: inherit;
+		th {
+			border: inherit;
+		}
+		td {
+			border: inherit;
+		}
+	}
+	.number {
+		width: 32px;
+	}
+	.name {
+		width: 240px;
+	}
+	.measure {
+		width: 72px;
+	}
+	.quantity {
+		width: 56px;
+	}
+	tfoot tr > th:first-child {
+		text-align: left;
+	}
+}

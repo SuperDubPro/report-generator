@@ -125,17 +125,7 @@ checkBrowsers(paths.appPath, isInteractive)
     }));
 
     devServer.use('/generateReport', async function (req, res) {
-      const body = req.body;
-      // fs.writeFile(
-      //   `${__dirname}/storage/${req.body.id}.json`,
-      //   JSON.stringify(body),
-      //   'utf8',
-      //   (err) => {
-      //     if (err) throw err;
-      //     console.log('The file has been saved!');
-      //   }
-      // );
-      actions.generateReport(body.data).then(val => {
+      actions.generateReport(req.body.data).then(val => {
         res.send("Success!");
       });
     });
@@ -188,6 +178,16 @@ checkBrowsers(paths.appPath, isInteractive)
 
         res.send(storage);
       });
+    });
+
+    devServer.use('/generateXlsx', function(req, res) {
+      actions.generateXlsx(req.body.data).then(val => {
+        res.send('XLSX generated!');
+      })
+    });
+
+    devServer.use('/downloadXlsx', function(req, res) {
+      res.sendFile(__dirname + '/reports/MyXLSX.xlsx');
     });
 
     // Launch WebpackDevServer.
