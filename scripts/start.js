@@ -180,14 +180,14 @@ checkBrowsers(paths.appPath, isInteractive)
       });
     });
 
-    devServer.use('/generateXlsx', function(req, res) {
-      actions.generateXlsx(req.body.data).then(val => {
-        res.send('XLSX generated!');
+    devServer.use('/generateSpec', function(req, res) {
+      actions.generateSpec(req.body).then(val => {
+        res.send('Specification generated!');
       })
     });
 
-    devServer.use('/downloadXlsx', function(req, res) {
-      res.sendFile(__dirname + '/reports/MyXLSX.xlsx');
+    devServer.use('/downloadSpec', function(req, res) {
+      res.sendFile(__dirname + '/reports/MySpec.xlsx');
     });
 
     // Launch WebpackDevServer.

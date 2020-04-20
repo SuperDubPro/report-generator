@@ -3,122 +3,74 @@ import './Table.scss';
 import axios from 'axios';
 import params from "../Form/reportParams";
 import Row from "./rowClass";
+import Subsection from "./subsectionClass";
+import Section from "./sectionClass";
 import ContentEditable from 'react-contenteditable';
-
 
 export default class Table extends React.Component {
 	constructor(props) {
 		super(props);
 		this.params = params;
 		this.state = {
-			firstSection: [],
-			secondSection: [],
-			firstSectionPrice: null,
-			secondSectionPrice: null,
+			sections: [],
 			relatedExpanses: null,
 			sumPrice: null
 		};
 	}
 
 	componentDidMount() {
-		const firstSection = [
-			new Row(1, 'olala', 'шт', 111, 30).structure,
-			new Row(43, 'olalala', 'шт', 112, 20).structure,
+		let sections = [
+			new Section([
+				new Subsection([
+					new Row(1, 'olala', 'шт', 100, 30).structure,
+					new Row(43, 'olalala', 'шт', 10, 20).structure
+				], 'Монтажные и пусконаладочные работы по разделу 1:').structure,
+				new Subsection([
+					new Row(42, 'olala2', 'шт', 1, 30).structure,
+					new Row(43, 'olalala2', 'шт', 100, 10).structure,
+				], 'Оборудование и материалы по разделу 1:').structure
+			], 'Раздел 1. Система  автоматической пожарной сигнализации и оповещения и управления эвакуацией людей при пожаре (АПС и СОУЭ)').structure
 		];
-		const secondSection = [
-			new Row(42, 'olala2', 'шт', 111, 30).structure,
-			new Row(43, 'olalala2', 'шт', 112, 10).structure,
-		];
-		const firstSectionPrice = this.getSectionPrice(firstSection);
-		const secondSectionPrice = this.getSectionPrice(secondSection);
-		const sectionsSumPrice = firstSectionPrice + secondSectionPrice;
+
+		const sectionsSumPrice = this.getSumPrice(sections);
 		const relatedExpanses = (sectionsSumPrice * 0.08);
 		const sumPrice = sectionsSumPrice + relatedExpanses;
 
 		this.setState({
-			firstSection,
-			secondSection,
-			firstSectionPrice,
-			secondSectionPrice,
+			sections,
 			relatedExpanses,
 			sumPrice
 		})
 	}
 
-	componentDidUpdate(prevProps, prevState, snapshot) {
-		// if(prevState.firstSection !== this.state.firstSection) {
-		// 	this.handleSectionChange('firstSection')
-		// }
-		// if(prevState.secondSection !== this.state.secondSection) {
-		// 	this.handleSectionChange('secondSection')
-		// }
-	}
-
-	// handleSectionChange(section) {
-	// 	const firstSectionPrice = section === 'firstSection' ? this.getSectionPrice(this.state[section]) : (this.state.firstSectionPrice || 0);
-	// 	const secondSectionPrice = section === 'secondSection' ? this.getSectionPrice(this.state[section]) : (this.state.secondSectionPrice || 0);
-	// 	const sectionsSumPrice = firstSectionPrice + secondSectionPrice;
-	// 	const relatedExpanses = (sectionsSumPrice * 0.08);
-	// 	const sumPrice = sectionsSumPrice + relatedExpanses;
-	//
-	// 	if (firstSectionPrice){
-	// 		this.setState({
-	// 			firstSectionPrice,
-	// 			relatedExpanses,
-	// 			sumPrice
-	// 		})
-	// 	} else {
-	// 		this.setState({
-	// 			secondSectionPrice,
-	// 			relatedExpanses,
-	// 			sumPrice
-	// 		})
-	// 	}
-	// }
-
-	getSectionPrice(arr) {
+	getSumPrice(arr) {
 		return arr.reduce((acc, val) => {
 			return acc + val.sumPrice;
 		}, 0);
 	}
 
 	handleButtonClick() {
-		this.generateXlsx().then(res => {
-			this.downloadXlsx()
+		this.generateSpec().then(res => {
+			this.downloadSpec()
 		})
 	}
 
-	getFixedSection(section) {
-		return this.state[section].map(row => {
-			row.unitPrice = row.unitPrice.toFixed(2);
-			row.sumPrice = row.sumPrice.toFixed(2);
-			return row;
-		})
-	}
-
-	generateXlsx() {
+	generateSpec() {
 		return axios({
 			method: 'post',
-			url: '/generateXlsx',
+			url: '/generateSpec',
 			data: {
-				data: {
-					// firstSection: this.getFixedSection('firstSection'),
-					firstSection: this.state.firstSection,
-					// secondSection: this.getFixedSection('secondSection'),
-					secondSection: this.state.secondSection,
-					firstSectionPrice: this.state.firstSectionPrice,
-					secondSectionPrice: this.state.secondSectionPrice,
-					relatedExpanses: this.state.relatedExpanses,
-					sumPrice: this.state.sumPrice,
-				}
+				sections: this.state.sections,
+				relatedExpanses: this.state.relatedExpanses,
+				sumPrice: this.state.sumPrice,
 			}
 		}).then(res=> {
 			return res;
 		});
 	}
 
-	downloadXlsx() {
-		const url = '/downloadXlsx';
+	downloadSpec() {
+		const url = '/downloadSpec';
 		const a = document.createElement('a');
 		a.style.display = 'none';
 		a.href = url;
@@ -129,47 +81,68 @@ export default class Table extends React.Component {
 		document.body.removeChild(a);
 	}
 
-	// handleCellChange(e){
-	// 	const [sectionName, row, column] = e.currentTarget.className.split(' ');
-	// 	console.log(e.target.value);
-	// 	const r = e.target.value.match(/>(.*)</);
-	// 	console.log(r);
-	// 	let value = r[1];
-	//
-	// 	let sectionVal = this.state[sectionName];
-	// 	sectionVal[row][column] = value === '<br>' ? '' : value ;
-	//
-	// 	this.setState({
-	// 		[sectionName]: sectionVal
-	// 	});
-	// }
-
-	handleCellChange(e){
-		const [sectionName, row, column] = e.currentTarget.className.split(' ');
+	handleTitleChange(e) {
+		const [sectionNum, subsectionNum, type] = e.currentTarget.className.split(' ');
 		const value = e.target.value;
-		let section = this.state[sectionName];
-		section[row][column] = value;
-
-		this.setState(
-			{[sectionName]: section},
-			() => {
-				if(column === 'unitPrice' || column === 'quantity') {
-					this.updateRowSumPrice(sectionName, row);
-				}
-			}
-		);
+		// console.log(sectionNum, subsectionNum, type, value);
+		const sections = this.state.sections;
+		switch (type) {
+			case "subsection-title":
+				sections[sectionNum].subsections[subsectionNum].title = value;
+				break;
+			case "section-title":
+				sections[sectionNum].title = value;
+				break;
+			case "subsection-price":
+				sections[sectionNum].subsections[subsectionNum].priceRow = value;
+				break;
+		}
+		this.setState({sections});
 	}
 
-	updateRowSumPrice(sectionName, rowNum) {
-		let section = this.state[sectionName];
-		let row = section[rowNum];
-		const quantity = row.quantity;
-		const unitPrice = row.unitPrice;
-		row.sumPrice = quantity * unitPrice;
-		section[rowNum] = row;
+	handleCellChange(e){
+		const [sectionNum, subsectionNum, rowNum, column] = e.currentTarget.className.split(' ');
+		let value = e.target.value;
+		if(column === 'number' || column === 'quantity' || column === 'unitPrice') value = parseFloat(value);
+		// console.log(sectionNum, subsectionNum, rowNum, column, value);
+		const sections = this.state.sections;
+		sections[sectionNum].subsections[subsectionNum].rows[rowNum][column] = value;
+
+		if(column === 'unitPrice' || column === 'quantity') {
+			this.updateRowSumPrice(sectionNum, subsectionNum, rowNum, sections)
+		} else {
+			this.setState({sections});
+		}
+	}
+
+	handleCrossClick(e){
+		const [crossType, sectionNum, subsectionNum, rowNum] = e.currentTarget.className.split(' ');
+		let sections = this.state.sections;
+		switch (crossType) {
+			case 'delete-row':
+				let rows = sections[sectionNum].subsections[subsectionNum].rows;
+				if(rows.length === 1) return;
+				rows.splice(rowNum, 1);
+				break;
+			case 'delete-section':
+				if(sections.length === 1) return;
+				sections.splice(sectionNum, 1);
+				break
+		}
+		this.setState({sections});
+	}
+
+	updateRowSumPrice(sectionNum, subsectionNum, rowNum, sections) {
+		if(!sections) sections = this.state.sections;
+		const section = sections[sectionNum];
+		const subsection = section.subsections[subsectionNum];
+		const row = subsection.rows[rowNum];
+		row.sumPrice = row.quantity * row.unitPrice;
+		subsection.sumPrice = this.getSumPrice(subsection.rows);
+		section.sumPrice = this.getSumPrice(section.subsections);
 
 		this.setState(
-			{[sectionName]: section},
+			{sections},
 			() => {
 				this.updateSumPrices();
 			}
@@ -177,45 +150,75 @@ export default class Table extends React.Component {
 	}
 
 	updateSumPrices() {
-		const firstSectionPrice = this.getSectionPrice(this.state.firstSection);
-		const secondSectionPrice = this.getSectionPrice(this.state.secondSection);
-		const sectionsSumPrice = firstSectionPrice + secondSectionPrice;
+		const sectionsSumPrice = this.getSumPrice(this.state.sections);
 		const relatedExpanses = (sectionsSumPrice * 0.08);
 		const sumPrice = sectionsSumPrice + relatedExpanses;
 
 		this.setState({
-			firstSectionPrice,
-			secondSectionPrice,
 			relatedExpanses,
 			sumPrice
 		})
 	}
 
-	getRows(sectionName) {
-		return this.state[sectionName].map((row, rowNum) => {
+	getSubsections(sectionNum) {
+		// const section = this.state.sections[sectionNum];
+		return this.state.sections[sectionNum].subsections.map((subsection, subsectionNum) => {
+			const key = `${sectionNum} ${subsectionNum}`;
 			return (
-				<tr key={`${sectionName} ${rowNum}`}>
-					<td><input className={`${sectionName} ${rowNum} number table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.number) || ''} /> </td>
-					<td><textarea className={`${sectionName} ${rowNum} name table-input`} onChange={e => this.handleCellChange(e)} value={row?.name || ''}> </textarea></td>
-					<td><input className={`${sectionName} ${rowNum} measure table-input`} onChange={e => this.handleCellChange(e)} value={row?.measure || ''} /> </td>
-					<td><input className={`${sectionName} ${rowNum} quantity table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.quantity) || ''} /> </td>
-					<td><input className={`${sectionName} ${rowNum} unitPrice table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.unitPrice) || ''} /> </td>
-					<td>{row?.sumPrice}</td>
+				<>
+					<tr key={`${key} subtitle`}>
+						<th colSpan="6"><input className={`${key} subsection-title table-input`} onChange={e => this.handleTitleChange(e)} value={subsection?.title || ''} /></th>
+					</tr>
+					{
+						this.getRows(sectionNum, subsectionNum)
+					}
+					<tr key={`${key} addRow`}><td colSpan='6'><button type='button' onClick={e => this.addRow(sectionNum, subsectionNum)}>Добавить строку</button></td></tr>
+					<tr key={`${key} subprice`}>
+						<td colSpan='5'><input className={`${key} subsection-price table-input`} onChange={e => this.handleTitleChange(e)} value={subsection?.priceRow || ''} /></td><td>{subsection.sumPrice?.toFixed(2)}</td>
+					</tr>
+				</>
+			)
+		})
+	}
+
+	getRows(sectionNum, subsectionNum) {
+		// const subsection = this.state.sections[sectionNum].subsections[subsectionNum];
+		return this.state.sections[sectionNum].subsections[subsectionNum].rows.map((row, rowNum) => {
+			const key = `${sectionNum} ${subsectionNum} ${rowNum}`;
+			return (
+				<tr key={key}>
+					<td><input className={`${key} number table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.number) || ''} /> </td>
+					<td><textarea className={`${key} name table-input`} onChange={e => this.handleCellChange(e)} value={row?.name || ''}> </textarea></td>
+					<td><input className={`${key} measure table-input`} onChange={e => this.handleCellChange(e)} value={row?.measure || ''} /> </td>
+					<td><input className={`${key} quantity table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.quantity) || ''} /> </td>
+					<td><input className={`${key} unitPrice table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.unitPrice) || ''} /> </td>
+					<td>{row?.sumPrice.toFixed(2)}<div className={`delete-row ${key} cross`} onClick={e => this.handleCrossClick(e)}>x</div></td>
 				</tr>
 			)
 		})
 	}
 
-	addRow(sectionName) {
-		let section = this.state[sectionName];
-		let number = section.length + 1;
-		if (sectionName === 'secondSection') number = number + this.state.firstSection.length;
+	addSection() {
+		let sections = this.state.sections;
+		sections.push(
+			new Section([
+				new Subsection([
+					new Row('', '', '', 0, 0).structure,
+				], 'Монтажные и пусконаладочные работы по разделу :').structure,
+				new Subsection([
+					new Row('', '', '', 0, 0).structure,
+				], 'Оборудование и материалы по разделу :').structure
+			], 'Раздел').structure
+		);
 
-		section.push(new Row(number, '', '', 0, 0));
+		this.setState({sections})
+	}
 
-		this.setState({
-			[sectionName]: section
-		})
+	addRow(sectionNum, subsectionNum) {
+		let sections = this.state.sections;
+		sections[sectionNum].subsections[subsectionNum].rows.push(new Row( '', '', '', 0, 0).structure);
+
+		this.setState({sections})
 	}
 
 	render() {
@@ -228,38 +231,26 @@ export default class Table extends React.Component {
 							<th>Наименование работ и материалов</th>
 							<th>Единица измерения</th>
 							<th>Кол-во</th>
-							<th>"Цена за единицу, руб."</th>
+							<th>Цена за единицу, руб.</th>
 							<th>Стоимость, руб.</th>
 						</tr>
 					</thead>
+						{
+							this.state.sections.map((section, sectionNum) => {
+								return (
+									<tbody key={`section${sectionNum}`}>
+										<tr>
+											<th colSpan="6"><input className={`${sectionNum} ${null} section-title table-input`} onChange={e => this.handleTitleChange(e)} value={section?.title || ''} /><div className={`delete-section ${sectionNum} ${null} ${null} cross`} onClick={e => this.handleCrossClick(e)}>x</div></th>
+										</tr>
+										{this.getSubsections(sectionNum)}
+									</tbody>
+								)
+							})
+						}
 					<tbody>
-						<tr>
-							<th colSpan="6">
-								Раздел 1. Система  автоматической пожарной сигнализации и оповещения и управления эвакуацией людей при пожаре (АПС и СОУЭ)
-							</th>
-						</tr>
-						<tr>
-							<th colSpan="6">
-								Монтажные и пусконаладочные работы по разделу 1:
-							</th>
-						</tr>
-						{this.getRows('firstSection')}
-						<tr><td colSpan='6'><button type='button' onClick={e => this.addRow('firstSection')}>Добавить строку</button></td></tr>
-						<tr><td colSpan='5'>Итого по Разделу 1 за программирование,  монтажные и пусконаладочные работы:</td><td>{this.state.firstSectionPrice?.toFixed(2)}</td></tr>
-					</tbody>
-					<tbody>
-					<tr>
-						<th colSpan="6">
-							Оборудование и материалы по разделу 1:
-						</th>
-					</tr>
-					{this.getRows('secondSection')}
-					<tr><td colSpan='6'><button type='button' onClick={e => this.addRow('secondSection')}>Добавить строку</button></td></tr>
-					<tr><td colSpan='5'>Итого по Разделу 1 за оборудование и материалы:</td><td>{this.state.secondSectionPrice?.toFixed(2)}</td></tr>
+						<tr><td colSpan='6'><button	type='button'	disabled={this.state.sections.length === 8} onClick={e => this.addSection()}>Добавить раздел</button></td></tr>
 					</tbody>
 					<tfoot>
-						<tr><th colSpan='5'>Итого по смете за монтажные и пусконаладочные работы:</th><th>{this.state.firstSectionPrice?.toFixed(2)}</th></tr>
-						<tr><th colSpan='5'>Итого по смете за оборудование и материалы:</th><th>{this.state.secondSectionPrice?.toFixed(2)}</th></tr>
 						<tr><th colSpan='5'>Накладные и транспортные расходы:</th><th>{this.state.relatedExpanses?.toFixed(2)}</th></tr>
 						<tr><th colSpan='5'>Итого по смете:</th><th>{this.state.sumPrice?.toFixed(2)}</th></tr>
 					</tfoot>

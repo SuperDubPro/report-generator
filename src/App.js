@@ -10,8 +10,8 @@ function App() {
       <Header> </Header>
       <Form> </Form>
       <div style={{borderTop:'4px solid darkgrey'}}>
-         этот раздел находится в разработке
-        <Table> </Table>
+        <div key={"SomeDiv"}>этот раздел находится в разработке</div>
+        <Table key={"TableComponent"}> </Table>
       </div>
     </div>
   );

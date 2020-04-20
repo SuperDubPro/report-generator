@@ -10,6 +10,14 @@ table {
 	}
 	tbody {
 		border: inherit;
+		tr:hover {
+			td, th {
+				.cross {
+					display: unset;
+					color: red;
+				}
+			}
+		}
 	}
 	tfoot {
 		border: inherit;
@@ -23,17 +31,28 @@ table {
 			border: inherit;
 		}
 	}
+	.table-input {
+		width: 90%;
+	}
 	.number {
 		width: 32px;
-	}
-	.name {
-		width: 240px;
 	}
 	.measure {
 		width: 72px;
 	}
 	.quantity {
 		width: 56px;
+	}
+	.cross {
+		display: none;
+		position: absolute;
+		cursor: pointer;
+	}
+	.delete-row {
+		//transform: translateX(24px);
+	}
+	.delete-section {
+		//transform: translateX(24px);
 	}
 	tfoot tr > th:first-child {
 		text-align: left;
