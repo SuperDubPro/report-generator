@@ -20,3 +20,24 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+button {
+  min-width: 120px;
+  margin: 16px 16px 16px 0;
+  border: 1px solid $react-dark;
+  border-radius: 4px;
+  outline: none;
+  min-height: 24px;
+  background: $react-turquoise;
+  transition: 0.3s;
+  cursor: pointer;
+  user-select: none;
+  &:focus {
+    border-color: $react-turquoise;
+  }
+  &:disabled {
+    border: 2px solid $react-light;
+    background: unset;
+    cursor: not-allowed;
+  }
+}

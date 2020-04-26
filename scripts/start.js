@@ -124,13 +124,14 @@ checkBrowsers(paths.appPath, isInteractive)
       extended: true
     }));
 
-    devServer.use('/generateReport', async function (req, res) {
+    devServer.use('/generateDocx', async function (req, res) {
+      console.log("!!!", req.body.data);
       actions.generateReport(req.body.data).then(val => {
         res.send("Success!");
       });
     });
 
-    devServer.use('/downloadReport', function (req, res) {
+    devServer.use('/downloadDocx', function (req, res) {
       res.sendFile(__dirname + '/reports/MyReport.docx');
     });
     
@@ -181,7 +182,8 @@ checkBrowsers(paths.appPath, isInteractive)
     });
 
     devServer.use('/generateSpec', function(req, res) {
-      actions.generateSpec(req.body).then(val => {
+      console.log("!!!",req.body);
+      actions.generateSpec(req.body.data).then(val => {
         res.send('Specification generated!');
       })
     });
