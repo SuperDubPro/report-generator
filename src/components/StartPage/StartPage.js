@@ -16,6 +16,8 @@ export default class StartPage extends React.Component {
 			docxData: {},
 			specName: 'MySpec',
 			specData: {},
+			ks2Name: 'MyKS2',
+			ks3Name: 'MyKS3',
 		};
 		this.pageSetState = this.pageSetState.bind(this);
 		this.getDoc = this.getDoc.bind(this);
@@ -54,11 +56,22 @@ export default class StartPage extends React.Component {
 	}
 
 	generate(docName) {
+		let data = {};
+		for (let key in this.state.docxData) {
+			data[key] = this.state.docxData[key];
+		}
+		for (let key in this.state.specData) {
+			data[key] = this.state.specData[key];
+		}
+		// else {
+		// 	data = this.state[`${docName}Data`]
+		// }
+		console.log(data);
 		return axios({
 			method: 'post',
 			url: `/generate${this.formatName(docName)}`,
 			data: {
-				data: this.state[`${docName}Data`],
+				data
 			}
 		}).then(res=> {
 			return res;
@@ -126,6 +139,12 @@ export default class StartPage extends React.Component {
 				<div style={{borderTop:'4px solid darkgrey'}}>
 					<div>этот раздел находится в разработке</div>
 					<Table pageState={this.state} pageSetState={this.pageSetState} getDoc={this.getDoc}/>
+					<button type="button" onClick={e => this.getDoc('ks2')}>
+						Скачать КС-2
+					</button>
+					<button type="button" onClick={e => this.getDoc('ks3')}>
+						Скачать КС-3
+					</button>
 				</div>
 			</div>
 		)

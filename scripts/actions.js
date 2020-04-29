@@ -3,24 +3,29 @@ const fs = require('fs');
 const xlsxTemplate = require('xlsx-template');
 
 
-let outputDirPath = './scripts/reports';
+let outputDir = './scripts/reports';
 
 function generateReport(data) {
+	// if(data.sections) {
+	// 	setSectionsMapping(data.sections, data);
+	// }
+	// console.log(data.sections[0].subsections[0].rows[0]);
 	return new Promise((res, rej) => {
 		res(createReport({
 			template: './scripts/templates/template.docx',
-			output: `${outputDirPath}/MyReport.docx`,
-			data
+			output: `${outputDir}/MyReport.docx`,
+			data,
+			cmdDelimiter: ['{', '}'],
 		}).catch(err => rej(err)))
 	})
 }
 
-function generateSpec(data) {
+function generateXlsx(data, type) {
 	// Load an XLSX file into memory
 	// console.log("!!!",__dirname);
 	return new Promise( (res, rej) => {
 		const specLength = data.sections.length;
-		fs.readFile(`${__dirname}/templates/specification/template${specLength}.xlsx`, function(err, file) {
+		fs.readFile(`${__dirname}/templates/${type}/template${specLength}.xlsx`, function(err, file) {
 			if(err) rej(err);
 			// Create a template
 			const template = new xlsxTemplate(file);
@@ -28,7 +33,6 @@ function generateSpec(data) {
 			// Replacements take place on first sheet
 			let sheetNumber = 1;
 			setSectionsMapping(data.sections, data);
-			console.log(data);
 			// Set up some placeholder values matching the placeholders in the template
 			// const values = {
 			// 	extractDate: new Date(),
@@ -47,7 +51,7 @@ function generateSpec(data) {
 			// Get binary data
 			// const data = template.generate({type: 'uint8array'});
 			let xlsxBuffer = template.generate();
-			fs.writeFile(__dirname + '/reports/MySpec.xlsx', xlsxBuffer, 'binary', (err)=>{
+			fs.writeFile(__dirname + `/reports/My_${type}.xlsx`, xlsxBuffer, 'binary', (err)=>{
 				if (err) throw err;
 				res("Spec success!")
 			});
@@ -72,5 +76,5 @@ function setSectionsMapping(sections, outputObj) {
 
 module.exports = {
 	generateReport,
-	generateSpec
+	generateXlsx
 };

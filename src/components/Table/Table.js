@@ -68,9 +68,6 @@ export default class Table extends React.Component {
 		// const value = e.target.value;
 		const value = this.getCellVal(e);
 
-		// console.log(e.currentTarget.focus);
-		// e.currentTarget.focus
-
 		const specData = this.props.pageState.specData;
 		const sections = specData.sections;
 		switch (type) {
@@ -83,6 +80,9 @@ export default class Table extends React.Component {
 			case "subsection-price":
 				sections[sectionNum].subsections[subsectionNum].priceRow = value;
 				break;
+			case "section-price":
+				sections[sectionNum].priceRow = value;
+				break
 		}
 		specData.sections = sections;
 		this.props.pageSetState('specData', specData);
@@ -209,10 +209,16 @@ export default class Table extends React.Component {
 	getEditableContentTag(variable, className, type, value) {
 		if(!value) value = variable;
 		return (
-			variable &&
-			<ContentEditable className={className} onChange={eval(`e => this.handle${type}Change(e)`)} id={className} html={`<div>${value? value : ''}</div>`} />
-		) || (
-			<input className={className} onChange={eval(`e => this.handle${type}Change(e)`)} value={value? value : ''} autoFocus={true} />
+			<ContentEditable
+				className={className}
+				onChange={eval(`e => this.handle${type}Change(e)`)}
+				id={className}
+				html={
+					variable
+						? `<div>${value ? value : ' '}</div>`
+						: `<br/>`
+				}
+			/>
 		)
 	}
 
@@ -220,14 +226,26 @@ export default class Table extends React.Component {
 		const specData = this.props.pageState.specData;
 		const sections = specData.sections;
 		sections.push(
-			new Section([
-				new Subsection([
-					new Row('', '', '', 0, 0).structure,
-				], 'Монтажные и пусконаладочные работы по разделу :').structure,
-				new Subsection([
-					new Row('', '', '', 0, 0).structure,
-				], 'Оборудование и материалы по разделу :').structure
-			], 'Раздел').structure
+			new Section(
+				[
+					new Subsection(
+						[
+							new Row(0, '', 'шт', 0, 0).structure,
+						],
+						'Подраздел:',
+						'Итого'
+					).structure,
+					new Subsection(
+						[
+							new Row(0, '', 'шт', 0, 0).structure,
+						],
+						'Подраздел:',
+						'Итого:'
+					).structure
+				],
+				'Раздел',
+				'Итого по разделу'
+			).structure
 		);
 
 		specData.sections = sections;
@@ -237,7 +255,7 @@ export default class Table extends React.Component {
 	addRow(sectionNum, subsectionNum) {
 		const specData = this.props.pageState.specData;
 		const sections = specData.sections;
-		sections[sectionNum].subsections[subsectionNum].rows.push(new Row( '', '', '', 0, 0).structure);
+		sections[sectionNum].subsections[subsectionNum].rows.push(new Row( 0, '', 'шт', 0, 0).structure);
 
 		specData.sections = sections;
 		this.props.pageSetState('specData', specData);
@@ -273,6 +291,9 @@ export default class Table extends React.Component {
 											</th>
 										</tr>
 										{this.getSubsections(sectionNum)}
+										<tr>
+											<th colSpan='5'>{this.getEditableContentTag(section.priceRow, `${sectionNum} ${null} section-price table-input`, 'Title')}</th><th>{section.sumPrice?.toFixed(2)}</th>
+										</tr>
 									</tbody>
 								)
 							})

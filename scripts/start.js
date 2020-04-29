@@ -125,7 +125,6 @@ checkBrowsers(paths.appPath, isInteractive)
     }));
 
     devServer.use('/generateDocx', async function (req, res) {
-      console.log("!!!", req.body.data);
       actions.generateReport(req.body.data).then(val => {
         res.send("Success!");
       });
@@ -182,14 +181,33 @@ checkBrowsers(paths.appPath, isInteractive)
     });
 
     devServer.use('/generateSpec', function(req, res) {
-      console.log("!!!",req.body);
-      actions.generateSpec(req.body.data).then(val => {
+      actions.generateXlsx(req.body.data, 'spec').then(val => {
         res.send('Specification generated!');
       })
     });
 
     devServer.use('/downloadSpec', function(req, res) {
-      res.sendFile(__dirname + '/reports/MySpec.xlsx');
+      res.sendFile(__dirname + '/reports/My_spec.xlsx');
+    });
+
+    devServer.use('/generateKs2', function(req, res) {
+      actions.generateXlsx(req.body.data, 'ks2').then(val => {
+        res.send('ks2 generated!');
+      })
+    });
+
+    devServer.use('/downloadKs2', function(req, res) {
+      res.sendFile(__dirname + '/reports/My_ks2.xlsx');
+    });
+
+    devServer.use('/generateKs3', function(req, res) {
+      actions.generateXlsx(req.body.data, 'ks3').then(val => {
+        res.send('ks3 generated!');
+      })
+    });
+
+    devServer.use('/downloadKs3', function(req, res) {
+      res.sendFile(__dirname + '/reports/My_ks3.xlsx');
     });
 
     // Launch WebpackDevServer.
