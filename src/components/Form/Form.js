@@ -109,7 +109,7 @@ export default class Form extends React.Component {
 							type='button'
 							disabled={this.state.disableButton}
 						>
-							Создать отчет
+							Скачать отчет
 						</button>
 						<button
 							onClick={e => this.props.saveParams()}

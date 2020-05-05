@@ -10,6 +10,7 @@ import ContentEditable from 'react-contenteditable';
 
 const TAX = 0.20;
 const RELATED_EXPANSES = 0.08;
+const MAX_SECTIONS_LENGTH = 8;
 
 export default class Table extends React.Component {
 	componentDidMount() {
@@ -24,25 +25,37 @@ export default class Table extends React.Component {
 			], 'Раздел 1. Система  автоматической пожарной сигнализации и оповещения и управления эвакуацией людей при пожаре (АПС и СОУЭ)')
 		];
 
-		// const contractNumber = '1';
-
 		const sectionsSumPrice = this.getSumPrice(sections);
+		const sectionsSumPriceInWords = this.getNumInWords(sectionsSumPrice);
 		const relatedExpanses = sectionsSumPrice * RELATED_EXPANSES;
 		const sumPriceTaxFree = sectionsSumPrice + relatedExpanses;
+		const sumPriceTaxFreeInWords = this.getNumInWords(sumPriceTaxFree);
 		const tax = sumPriceTaxFree * TAX;
 		const taxInWords = this.getNumInWords(tax) || '';
 		const sumPrice = sectionsSumPrice + relatedExpanses + tax;
 		const sumPriceInWords = this.getNumInWords(sumPrice) || '';
+		const sumPriceHALF = this.getNumHalf(sumPrice,'big') || '';
+		const sumPriceHalf = this.getNumHalf(sumPrice,'small') || '';
+		const sumPriceHALFInWords = this.getNumInWords(sumPriceHALF) || '';
+		const sumPriceHalfInWords = this.getNumInWords(sumPriceHalf) || '';
+		const itemsQuantity = this.getItemsQuantity(sections);
 
 		const specData = {
 			sections,
+			sectionsSumPrice,
+			sectionsSumPriceInWords,
 			relatedExpanses,
 			sumPrice,
 			sumPriceInWords,
 			tax,
 			taxInWords,
 			sumPriceTaxFree,
-			// contractNumber
+			sumPriceTaxFreeInWords,
+			sumPriceHALF,
+			sumPriceHalf,
+			sumPriceHALFInWords,
+			sumPriceHalfInWords,
+			itemsQuantity,
 		};
 
 		this.props.pageSetState('specData', specData)
@@ -105,6 +118,34 @@ export default class Table extends React.Component {
 		return razUp(num_letters(a[0]) + ')' + declOfNum(a[0], 'рубл', ['ь','я','ей']) + ' ' + a[1] + declOfNum(a[1], 'копе', ['йка','йки','ек']));
 	}
 
+	getNumHalf(num, type){
+		num = num * 100;
+		if(num % 2) {
+			if(type === 'big') {
+				num = Math.ceil(num/2);
+			}
+			if(type === 'small') {
+				num = Math.floor(num/2);
+			}
+			return num/100
+		} else {
+			return num / 200;
+		}
+	}
+
+	getItemsQuantity(sections) {
+		let q = 0;
+		sections.forEach(section => {
+			++q; //в КС в каждой секции есть строка накладные и транспортные расходы
+			section.subsections.forEach(subsection => {
+				subsection.rows.forEach(row => {
+					++q;
+				})
+			})
+		});
+		return q;
+	}
+
 	getCellVal(e) {
 		const r = e.target.value.match(/>(.*)</);
 		// console.log(r);
@@ -147,9 +188,6 @@ export default class Table extends React.Component {
 				break;
 			case 'section-price':
 				section.priceRow = value;
-				break;
-			case 'contract-number':
-				specData.contractNumber = value;
 				break;
 		}
 
@@ -248,17 +286,25 @@ export default class Table extends React.Component {
 	}
 
 	updateSumPrices(data) {
-		const sectionsSumPrice = this.getSumPrice(data.sections);
-		data.relatedExpanses = sectionsSumPrice * RELATED_EXPANSES;
-		data.sumPriceTaxFree = sectionsSumPrice + data.relatedExpanses;
+		data.sectionsSumPrice = this.getSumPrice(data.sections);
+		data.sectionsSumPriceInWords = this.getNumInWords(data.sectionsSumPrice);
+		data.relatedExpanses = data.sectionsSumPrice * RELATED_EXPANSES;
+		data.sumPriceTaxFree = data.sectionsSumPrice + data.relatedExpanses;
+		data.sumPriceTaxFreeInWords = this.getNumInWords(data.sumPriceTaxFree);
 		data.tax = data.sumPriceTaxFree * TAX;
 		data.taxInWords = this.getNumInWords(data.tax) || '';
-		data.sumPrice = sectionsSumPrice + data.relatedExpanses + data.tax;
+		data.sumPrice = data.sectionsSumPrice + data.relatedExpanses + data.tax;
 		data.sumPriceInWords = this.getNumInWords(data.sumPrice) || '';
+		data.sumPriceHALF = this.getNumHalf(data.sumPrice,'big') || '';
+		data.sumPriceHalf = this.getNumHalf(data.sumPrice,'small') || '';
+		data.sumPriceHALFInWords = this.getNumInWords(data.sumPriceHALF) || '';
+		data.sumPriceHalfInWords = this.getNumInWords(data.sumPriceHalf) || '';
+		data.itemsQuantity = this.getItemsQuantity(data.sections);
 	}
 
 	updateSectionSumPrice(section) {
-		section.sumPrice = this.getSumPrice(section.subsections)
+		section.sumPrice = this.getSumPrice(section.subsections);
+		section.relatedExpanses = section.sumPrice * RELATED_EXPANSES;
 	}
 
 	updateSubsectionSumPrice(subsection) {
@@ -350,14 +396,6 @@ export default class Table extends React.Component {
 
 		return (
 			<>
-				{/*<div style={{textAlign:'start', margin:'4px'}}>*/}
-				{/*	Номер договора:*/}
-				{/*	<input*/}
-				{/*		className={`${null} ${null} ${null} contract-number`}*/}
-				{/*		onChange={e => this.handleCellChange(e)}*/}
-				{/*		value={specData.contractNumber || ''}*/}
-				{/*	/>*/}
-				{/*</div>*/}
 				<table>
 					<thead>
 						<tr>
@@ -390,7 +428,7 @@ export default class Table extends React.Component {
 						}
 					<tbody>
 						<tr>
-							<td colSpan='6'><button	type='button'	disabled={sections.length === 8} onClick={e => this.addSection()}>Добавить раздел</button></td>
+							<td colSpan='6'><button	type='button'	disabled={sections.length === MAX_SECTIONS_LENGTH} onClick={e => this.addSection()}>Добавить раздел</button></td>
 							{this.getCrossCell()}
 						</tr>
 					</tbody>

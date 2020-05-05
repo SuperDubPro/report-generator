@@ -4,6 +4,7 @@ export default class Section {
 		this.sumPrice = this.sectionPrice();
 		this.title = title || '';
 		this.priceRow = priceRow || 'Итого по разделу';
+		this.relatedExpanses = this.sumPrice * 0.08;
 	}
 
 	sectionPrice() {
