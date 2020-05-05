@@ -12,9 +12,10 @@ table {
 		border: inherit;
 		tr:hover {
 			td, th {
-				.cross {
-					display: unset;
-					color: red;
+				//:not(:only-child)
+				.delete-row, .delete-section {
+					visibility: unset;
+					//transition: .1s;
 				}
 			}
 		}
@@ -29,24 +30,26 @@ table {
 		}
 		td {
 			border: inherit;
+			button {
+				margin: 4px;
+			}
 		}
 	}
-	.table-input {
-		width: 90%;
-	}
-	.number {
-		width: 32px;
-	}
-	.measure {
-		width: 72px;
-	}
-	.quantity {
-		width: 56px;
-	}
 	.cross {
-		display: none;
-		position: absolute;
+		visibility: hidden;
 		cursor: pointer;
+		//transition: .1s;
+		color: red;
+	}
+	.subsection-price, .subsection-title, .section-price {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
+		align-items: center;
+	}
+	.cross-cell {
+		border-color: transparent;
+		padding-left: 4px;
 	}
 	.delete-row {
 		//transform: translateX(24px);

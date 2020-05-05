@@ -10,6 +10,7 @@ function generateReport(data) {
 	// 	setSectionsMapping(data.sections, data);
 	// }
 	// console.log(data.sections[0].subsections[0].rows[0]);
+	formatNums(data);
 	return new Promise((res, rej) => {
 		res(createReport({
 			template: './scripts/templates/template.docx',
@@ -72,6 +73,21 @@ function setSectionsMapping(sections, outputObj) {
 			outputObj[`section${sectionNum}_subsection${subsectionNum}_rows`] = subsection.rows;
 		});
 	});
+}
+
+function formatNums(obj) {
+	obj.sumPrice = obj.sumPrice.toFixed(2);
+	obj.relatedExpanses = obj.relatedExpanses.toFixed(2);
+	obj.sections.forEach(section => {
+		section.sumPrice = section.sumPrice.toFixed(2);
+		section.subsections.forEach(subsection => {
+			subsection.sumPrice = subsection.sumPrice.toFixed(2);
+			subsection.rows.forEach(row => {
+				row.sumPrice = row.sumPrice.toFixed(2);
+				row.unitPrice = row.unitPrice.toFixed(2);
+			})
+		})
+	})
 }
 
 module.exports = {

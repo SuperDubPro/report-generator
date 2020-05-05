@@ -7,15 +7,4 @@ export default class Row {
 		this.unitPrice = unitPrice;
 		this.sumPrice = quantity * unitPrice;
 	}
-
-	get structure() {
-		return {
-			number: this.number,
-			name: this.name,
-			measure: this.measure,
-			quantity: this.quantity,
-			unitPrice: this.unitPrice,
-			sumPrice: this.sumPrice
-		}
-	}
 }

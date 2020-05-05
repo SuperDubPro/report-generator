@@ -1,43 +1,48 @@
 import React from "react";
 import './Table.scss';
+
 import Row from "./rowClass";
 import Subsection from "./subsectionClass";
 import Section from "./sectionClass";
+
+import { default as Icon } from '../Icon';
 import ContentEditable from 'react-contenteditable';
 
-export default class Table extends React.Component {
-	// constructor(props) {
-	// 	super(props);
-	// 	this.params = params;
-	// 	this.state = {
-	// 		sections: [],
-	// 		relatedExpanses: null,
-	// 		sumPrice: null
-	// 	};
-	// }
+const TAX = 0.20;
+const RELATED_EXPANSES = 0.08;
 
+export default class Table extends React.Component {
 	componentDidMount() {
 		let sections = [
 			new Section([
 				new Subsection([
-					new Row(1, 'olala', 'шт', 100, 30).structure,
-					new Row(43, 'olalala', 'шт', 10, 20).structure
-				], 'Монтажные и пусконаладочные работы по разделу 1:').structure,
+					new Row(1, 'название', 'шт', 1, 1),
+				], 'Монтажные и пусконаладочные работы по разделу 1:'),
 				new Subsection([
-					new Row(42, 'olala2', 'шт', 1, 30).structure,
-					new Row(43, 'olalala2', 'шт', 100, 10).structure,
-				], 'Оборудование и материалы по разделу 1:').structure
-			], 'Раздел 1. Система  автоматической пожарной сигнализации и оповещения и управления эвакуацией людей при пожаре (АПС и СОУЭ)').structure
+					new Row(2, 'название', 'шт', 1, 1),
+				], 'Оборудование и материалы по разделу 1:')
+			], 'Раздел 1. Система  автоматической пожарной сигнализации и оповещения и управления эвакуацией людей при пожаре (АПС и СОУЭ)')
 		];
 
+		// const contractNumber = '1';
+
 		const sectionsSumPrice = this.getSumPrice(sections);
-		const relatedExpanses = (sectionsSumPrice * 0.08);
-		const sumPrice = sectionsSumPrice + relatedExpanses;
+		const relatedExpanses = sectionsSumPrice * RELATED_EXPANSES;
+		const sumPriceTaxFree = sectionsSumPrice + relatedExpanses;
+		const tax = sumPriceTaxFree * TAX;
+		const taxInWords = this.getNumInWords(tax) || '';
+		const sumPrice = sectionsSumPrice + relatedExpanses + tax;
+		const sumPriceInWords = this.getNumInWords(sumPrice) || '';
 
 		const specData = {
 			sections,
 			relatedExpanses,
-			sumPrice
+			sumPrice,
+			sumPriceInWords,
+			tax,
+			taxInWords,
+			sumPriceTaxFree,
+			// contractNumber
 		};
 
 		this.props.pageSetState('specData', specData)
@@ -49,134 +54,255 @@ export default class Table extends React.Component {
 		}, 0);
 	}
 
+	getNumInWords(a) {
+		if(!a) return;
+		a = a.toString().replace(',','.');
+		a = Number(a).toFixed(2).split('.');  // округлить до сотых и сделать массив двух чисел: до точки и после неё
+
+		function num_letters(k, d) {  // целое число прописью, это основа
+			let i = '', e = [
+				['','тысяч','миллион','миллиард','триллион','квадриллион','квинтиллион','секстиллион','септиллион','октиллион','нониллион','дециллион'],
+				['а','и',''],
+				['','а','ов']
+			];
+
+			if (k === '' || k === '0') return ' ноль'; // 0
+			k = k.split(/(?=(?:\d{3})+$)/);  // разбить число в массив с трёхзначными числами
+			if (k[0].length === 1) k[0] = '00'+k[0];
+			if (k[0].length === 2) k[0] = '0'+k[0];
+
+			// console.log('1k: ', k);
+			for (let j = (k.length - 1); j >= 0; j--) {  // соединить трёхзначные числа в одно число, добавив названия разрядов с окончаниями
+				if (k[j] !== '000') {
+					i = (((d && j === (k.length - 1)) || j === (k.length - 2)) && (k[j][2] === '1' || k[j][2] === '2') ? t(k[j],1) : t(k[j])) + declOfNum(k[j], e[0][k.length - 1 - j], (j === (k.length - 2) ? e[1] : e[2])) + i;
+				}
+			}
+
+			return i;
+		}
+
+		function t(k, d) {  // преобразовать трёхзначные числа
+			let e = [
+				['',' один',' два',' три',' четыре',' пять',' шесть',' семь',' восемь',' девять'],
+				[' десять',' одиннадцать',' двенадцать',' тринадцать',' четырнадцать',' пятнадцать',' шестнадцать',' семнадцать',' восемнадцать',' девятнадцать'],
+				['','',' двадцать',' тридцать',' сорок',' пятьдесят',' шестьдесят',' семьдесят',' восемьдесят',' девяносто'],
+				['',' сто',' двести',' триста',' четыреста',' пятьсот',' шестьсот',' семьсот',' восемьсот',' девятьсот'],
+				['',' одна',' две']
+			];
+			return e[3][k[0]] + (k[1] === "1" ? e[1][k[2]] : e[2][k[1]] + (d ? e[4][k[2]] : e[0][k[2]]));
+		}
+
+		function declOfNum(n, t, o) {  // склонение именительных рядом с числительным: число (typeof = string), корень (не пустой), окончание
+			// if(!n || !t || !o) return;
+			let k = [2,0,1,1,1,2,2,2,2,2];
+			return (t === '' ? '' : ' ' + t + (n[n.length-2] === "1" ? o[2] : o[k[n[n.length-1]]]));
+		}
+
+		function razUp(e) {  // сделать первую букву заглавной и убрать лишний первый пробел
+			return a[0] + ' (' + e[1].toUpperCase() + e.substring(2);
+		}
+
+		return razUp(num_letters(a[0]) + ')' + declOfNum(a[0], 'рубл', ['ь','я','ей']) + ' ' + a[1] + declOfNum(a[1], 'копе', ['йка','йки','ек']));
+	}
+
 	getCellVal(e) {
 		const r = e.target.value.match(/>(.*)</);
 		// console.log(r);
 		let value;
-		if(r) {
 
+		if(r) {
 			value = r[1];
 		} else {
 			value = e.target.value;
 		}
+
 		return value
 	}
 
-	//используется в getEditableContentTag
-	handleTitleChange(e) {
-		const [sectionNum, subsectionNum, type] = e.currentTarget.className.split(' ');
-		// const value = e.target.value;
-		const value = this.getCellVal(e);
-
-		const specData = this.props.pageState.specData;
-		const sections = specData.sections;
-		switch (type) {
-			case "subsection-title":
-				sections[sectionNum].subsections[subsectionNum].title = value;
-				break;
-			case "section-title":
-				sections[sectionNum].title = value;
-				break;
-			case "subsection-price":
-				sections[sectionNum].subsections[subsectionNum].priceRow = value;
-				break;
-			case "section-price":
-				sections[sectionNum].priceRow = value;
-				break
-		}
-		specData.sections = sections;
-		this.props.pageSetState('specData', specData);
-	}
-
-	//используется в getEditableContentTag
 	handleCellChange(e){
 		const [sectionNum, subsectionNum, rowNum, column] = e.currentTarget.className.split(' ');
-		// let value = e.target.value;
 		let value = this.getCellVal(e);
-
-
-		if(column === 'number' || column === 'quantity' || column === 'unitPrice') value = parseFloat(value);
-		// console.log(sectionNum, subsectionNum, rowNum, column, value);
-
 		const specData = this.props.pageState.specData;
-		const sections = specData.sections;
-		sections[sectionNum].subsections[subsectionNum].rows[rowNum][column] = value;
+		const section = specData.sections[sectionNum] || null;
+		const subsection = section?.subsections[subsectionNum] || null;
+		const row = subsection?.rows[rowNum] || null;
+
+		switch (column) {
+			case 'number':
+			case 'quantity':
+			case 'unitPrice':
+				value = parseFloat(value);
+			case 'measure':
+			case 'name':
+				row[column] = value;
+				break;
+			case 'subsection-title':
+				subsection.title = value;
+				break;
+			case 'section-title':
+				section.title = value;
+				break;
+			case 'subsection-price':
+				subsection.priceRow = value;
+				break;
+			case 'section-price':
+				section.priceRow = value;
+				break;
+			case 'contract-number':
+				specData.contractNumber = value;
+				break;
+		}
 
 		if(column === 'unitPrice' || column === 'quantity') {
-			this.updateRowSumPrice(sectionNum, subsectionNum, rowNum, sections)
-		} else {
-			specData.sections = sections;
-			this.props.pageSetState('specData', specData);
+			this.updateRowSumPrice(row);
+			this.updateSubsectionSumPrice(subsection);
+			this.updateSectionSumPrice(section);
+			this.updateSumPrices(specData)
 		}
+
+		this.props.pageSetState('specData', specData);
 	}
 
 	handleCrossClick(e){
 		const [crossType, sectionNum, subsectionNum, rowNum] = e.currentTarget.className.split(' ');
 		const specData = this.props.pageState.specData;
 		const sections = specData.sections;
+		const section = specData.sections[sectionNum] || null;
+		const subsection = section?.subsections[subsectionNum] || null;
+		const rows = subsection?.rows || null;
+
 		switch (crossType) {
 			case 'delete-row':
-				let rows = sections[sectionNum].subsections[subsectionNum].rows;
 				if(rows.length === 1) return;
 				rows.splice(rowNum, 1);
+				this.updateSubsectionSumPrice(subsection);
+				this.updateSectionSumPrice(section);
+				this.updateSumPrices(specData);
 				break;
 			case 'delete-section':
 				if(sections.length === 1) return;
 				sections.splice(sectionNum, 1);
+				this.updateSumPrices(specData);
 				break
 		}
-		specData.sections = sections;
+
+		this.updateRowsNumber(specData.sections);
 		this.props.pageSetState('specData', specData);
 	}
 
-	updateRowsNumber(){
-
+	updateRowsNumber(sections){
+		let rowNum = 0;
+		sections.forEach(section => {
+			section.subsections.forEach(subsection => {
+				subsection.rows.forEach(row => {
+					row.number = ++rowNum;
+				})
+			})
+		});
 	}
 
-	updateRowSumPrice(sectionNum, subsectionNum, rowNum, sections) {
+	addSection() {
 		const specData = this.props.pageState.specData;
-		if(!sections) sections = specData.sections;
-		// if(!sections) sections = this.state.sections;
+		specData.sections.push(
+			new Section(
+				[
+					new Subsection(
+						[
+							new Row(0, 'название', 'шт', 1, 1),
+						],
+						'Подраздел:',
+						'Итого'
+					),
+					new Subsection(
+						[
+							new Row(0, 'название', 'шт', 1, 1),
+						],
+						'Подраздел:',
+						'Итого:'
+					)
+				],
+				'Раздел',
+				'Итого по разделу'
+			)
+		);
 
-		const section = sections[sectionNum];
-		const subsection = section.subsections[subsectionNum];
-		const row = subsection.rows[rowNum];
-		row.sumPrice = row.quantity * row.unitPrice;
-		subsection.sumPrice = this.getSumPrice(subsection.rows);
-		section.sumPrice = this.getSumPrice(section.subsections);
-
-		const [relatedExpanses, sumPrice] = this.getUpdatedSumPrices(sections);
-		specData.relatedExpanses = relatedExpanses;
-		specData.sumPrice = sumPrice;
-
-		this.props.pageSetState('specData', specData)
+		this.updateSumPrices(specData);
+		this.updateRowsNumber(specData.sections);
+		this.props.pageSetState('specData', specData);
 	}
 
-	getUpdatedSumPrices(sections) {
-		const sectionsSumPrice = this.getSumPrice(sections);
-		const relatedExpanses = (sectionsSumPrice * 0.08);
-		const sumPrice = sectionsSumPrice + relatedExpanses;
-		return [relatedExpanses, sumPrice]
+	addRow(sectionNum, subsectionNum) {
+		const specData = this.props.pageState.specData;
+		const section = specData.sections[sectionNum];
+		const subsection = section.subsections[subsectionNum];
+		const rows = subsection.rows;
+		const newRowNum = rows.length;
+		rows.push(new Row( 0, 'название', 'шт', 1, 1));
+
+		this.updateRowSumPrice(rows[newRowNum]);
+		this.updateSubsectionSumPrice(subsection);
+		this.updateSectionSumPrice(section);
+		this.updateSumPrices(specData);
+		this.updateRowsNumber(specData.sections);
+		this.props.pageSetState('specData', specData);
+	}
+
+	updateSumPrices(data) {
+		const sectionsSumPrice = this.getSumPrice(data.sections);
+		data.relatedExpanses = sectionsSumPrice * RELATED_EXPANSES;
+		data.sumPriceTaxFree = sectionsSumPrice + data.relatedExpanses;
+		data.tax = data.sumPriceTaxFree * TAX;
+		data.taxInWords = this.getNumInWords(data.tax) || '';
+		data.sumPrice = sectionsSumPrice + data.relatedExpanses + data.tax;
+		data.sumPriceInWords = this.getNumInWords(data.sumPrice) || '';
+	}
+
+	updateSectionSumPrice(section) {
+		section.sumPrice = this.getSumPrice(section.subsections)
+	}
+
+	updateSubsectionSumPrice(subsection) {
+		subsection.sumPrice = this.getSumPrice(subsection.rows)
+	}
+
+	updateRowSumPrice(row) {
+		row.sumPrice = row.quantity * row.unitPrice;
+	}
+
+	getCrossCell(className) {
+		return (
+			<td className={`cross-cell`}>
+				<div className={`${className} cross`} onClick={e => this.handleCrossClick(e)}>
+					{
+						className &&
+						<Icon name='cross' />
+					}
+				</div>
+			</td>
+		)
 	}
 
 	getSubsections(sectionNum) {
 		const specData = this.props.pageState.specData;
 		const sections = specData.sections;
 		return sections[sectionNum].subsections.map((subsection, subsectionNum) => {
-			const key = `${sectionNum} ${subsectionNum}`;
+			const key = `${sectionNum} ${subsectionNum} ${null}`;
 			return (
 				<>
 					<tr key={`${key} subtitle`}>
-						{/*<th colSpan="6"><input className={`${key} subsection-title table-input`} onChange={e => this.handleTitleChange(e)} value={subsection?.title || ''} /></th>*/}
-						<th colSpan="6">{this.getEditableContentTag(subsection.title, `${key} subsection-title table-input`, 'Title')}</th>
+						<th colSpan="6">{this.getEditableContentTag(subsection.title, `${key} subsection-title table-input`)}</th>
+						{this.getCrossCell()}
 					</tr>
 					{
 						this.getRows(sectionNum, subsectionNum)
 					}
-					<tr key={`${key} addRow`}><td colSpan='6'><button type='button' onClick={e => this.addRow(sectionNum, subsectionNum)}>Добавить строку</button></td></tr>
+					<tr key={`${key} addRow`}>
+						<td colSpan='6'><button type='button' onClick={e => this.addRow(sectionNum, subsectionNum)}>Добавить строку</button></td>
+						{this.getCrossCell()}
+					</tr>
 					<tr key={`${key} subprice`}>
-						{/*<td colSpan='5'><input className={`${key} subsection-price table-input`} onChange={e => this.handleTitleChange(e)} value={subsection?.priceRow || ''} /></td><td>{subsection.sumPrice?.toFixed(2)}</td>*/}
-						<td colSpan='5'>{this.getEditableContentTag(subsection.priceRow, `${key} subsection-price table-input`, 'Title')}</td><td>{subsection.sumPrice?.toFixed(2)}</td>
+						<td colSpan='5'>{this.getEditableContentTag(subsection.priceRow, `${key} subsection-price table-input`)}</td><td>{subsection.sumPrice?.toFixed(2)}</td>
+						{this.getCrossCell()}
 					</tr>
 				</>
 			)
@@ -190,28 +316,24 @@ export default class Table extends React.Component {
 			const key = `${sectionNum} ${subsectionNum} ${rowNum}`;
 			return (
 				<tr key={key}>
-					{/*<td><input className={`${key} number table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.number) || ''} /> </td>*/}
-					{/*<td><textarea className={`${key} name table-input`} onChange={e => this.handleCellChange(e)} value={row?.name || ''}> </textarea></td>*/}
-					{/*<td><input className={`${key} measure table-input`} onChange={e => this.handleCellChange(e)} value={row?.measure || ''} /> </td>*/}
-					{/*<td><input className={`${key} quantity table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.quantity) || ''} /> </td>*/}
-					{/*<td><input className={`${key} unitPrice table-input`} onChange={e => this.handleCellChange(e)} value={parseFloat(row?.unitPrice) || ''} /> </td>*/}
-					<td>{this.getEditableContentTag(row.number, `${key} number table-input`, 'Cell', parseFloat(row?.number) || '')}</td>
-					<td>{this.getEditableContentTag(row.name, `${key} name table-input`, 'Cell')}</td>
-					<td>{this.getEditableContentTag(row.measure, `${key} measure table-input`, 'Cell')}</td>
-					<td>{this.getEditableContentTag(row.quantity, `${key} quantity table-input`, 'Cell', parseFloat(row?.quantity) || '')}</td>
-					<td>{this.getEditableContentTag(row.unitPrice, `${key} unitPrice table-input`, 'Cell', parseFloat(row?.unitPrice) || '')}</td>
-					<td>{row?.sumPrice.toFixed(2)}<div className={`delete-row ${key} cross`} onClick={e => this.handleCrossClick(e)}>x</div></td>
+					<td>{this.getEditableContentTag(row.number, `${key} number table-input`,parseFloat(row?.number) || '')}</td>
+					<td>{this.getEditableContentTag(row.name, `${key} name table-input`)}</td>
+					<td>{this.getEditableContentTag(row.measure, `${key} measure table-input`)}</td>
+					<td>{this.getEditableContentTag(row.quantity, `${key} quantity table-input`,parseFloat(row?.quantity) || '')}</td>
+					<td>{this.getEditableContentTag(row.unitPrice, `${key} unitPrice table-input`, parseFloat(row?.unitPrice) || '')}</td>
+					<td>{row?.sumPrice.toFixed(2)}</td>
+					{this.getCrossCell(`delete-row ${key}`)}
 				</tr>
 			)
 		})
 	}
 
-	getEditableContentTag(variable, className, type, value) {
+	getEditableContentTag(variable, className, value) {
 		if(!value) value = variable;
 		return (
 			<ContentEditable
 				className={className}
-				onChange={eval(`e => this.handle${type}Change(e)`)}
+				onChange={e => this.handleCellChange(e)}
 				id={className}
 				html={
 					variable
@@ -222,51 +344,20 @@ export default class Table extends React.Component {
 		)
 	}
 
-	addSection() {
-		const specData = this.props.pageState.specData;
-		const sections = specData.sections;
-		sections.push(
-			new Section(
-				[
-					new Subsection(
-						[
-							new Row(0, '', 'шт', 0, 0).structure,
-						],
-						'Подраздел:',
-						'Итого'
-					).structure,
-					new Subsection(
-						[
-							new Row(0, '', 'шт', 0, 0).structure,
-						],
-						'Подраздел:',
-						'Итого:'
-					).structure
-				],
-				'Раздел',
-				'Итого по разделу'
-			).structure
-		);
-
-		specData.sections = sections;
-		this.props.pageSetState('specData', specData);
-	}
-
-	addRow(sectionNum, subsectionNum) {
-		const specData = this.props.pageState.specData;
-		const sections = specData.sections;
-		sections[sectionNum].subsections[subsectionNum].rows.push(new Row( 0, '', 'шт', 0, 0).structure);
-
-		specData.sections = sections;
-		this.props.pageSetState('specData', specData);
-	}
-
 	render() {
 		const specData = this.props.pageState.specData;
 		const sections = specData.sections || [];
 
 		return (
 			<>
+				{/*<div style={{textAlign:'start', margin:'4px'}}>*/}
+				{/*	Номер договора:*/}
+				{/*	<input*/}
+				{/*		className={`${null} ${null} ${null} contract-number`}*/}
+				{/*		onChange={e => this.handleCellChange(e)}*/}
+				{/*		value={specData.contractNumber || ''}*/}
+				{/*	/>*/}
+				{/*</div>*/}
 				<table>
 					<thead>
 						<tr>
@@ -276,34 +367,58 @@ export default class Table extends React.Component {
 							<th>Кол-во</th>
 							<th>Цена за единицу, руб.</th>
 							<th>Стоимость, руб.</th>
+							{this.getCrossCell()}
 						</tr>
 					</thead>
 						{
 							sections.map((section, sectionNum) => {
-								const className = `${sectionNum} ${null} section-title table-input`;
+								const className = `${sectionNum} ${null} ${null} section-title table-input`;
 								return (
 									<tbody key={`section${sectionNum}`}>
 										<tr>
-											{/*<th colSpan="6"><input className={`${sectionNum} ${null} section-title table-input`} onChange={e => this.handleTitleChange(e)} value={section?.title || ''} /><div className={`delete-section ${sectionNum} ${null} ${null} cross`} onClick={e => this.handleCrossClick(e)}>x</div></th>*/}
-											<th colSpan="6">
-												{this.getEditableContentTag(section.title, className, 'Title')}
-												<div className={`delete-section ${sectionNum} ${null} ${null} cross`} onClick={e => this.handleCrossClick(e)}>x</div>
-											</th>
+											<th colSpan="6">{this.getEditableContentTag(section.title, className)}</th>
+											{this.getCrossCell(`delete-section ${sectionNum} ${null} ${null}`)}
 										</tr>
 										{this.getSubsections(sectionNum)}
 										<tr>
-											<th colSpan='5'>{this.getEditableContentTag(section.priceRow, `${sectionNum} ${null} section-price table-input`, 'Title')}</th><th>{section.sumPrice?.toFixed(2)}</th>
+											<th colSpan='5'>{this.getEditableContentTag(section.priceRow, `${sectionNum} ${null} ${null} section-price table-input`)}</th><th>{section.sumPrice?.toFixed(2)}</th>
+											{this.getCrossCell()}
 										</tr>
 									</tbody>
 								)
 							})
 						}
 					<tbody>
-						<tr><td colSpan='6'><button	type='button'	disabled={sections.length === 8} onClick={e => this.addSection()}>Добавить раздел</button></td></tr>
+						<tr>
+							<td colSpan='6'><button	type='button'	disabled={sections.length === 8} onClick={e => this.addSection()}>Добавить раздел</button></td>
+							{this.getCrossCell()}
+						</tr>
 					</tbody>
 					<tfoot>
-						<tr><th colSpan='5'>Накладные и транспортные расходы:</th><th>{specData.relatedExpanses?.toFixed(2)}</th></tr>
-						<tr><th colSpan='5'>Итого по смете:</th><th>{specData.sumPrice?.toFixed(2)}</th></tr>
+						<tr>
+							<th colSpan='5'>Накладные и транспортные расходы:</th><th>{specData.relatedExpanses?.toFixed(2)}</th>
+							{this.getCrossCell()}
+						</tr>
+						<tr>
+							<th colSpan='5'>Итого по смете:</th><th>{specData.sumPriceTaxFree?.toFixed(2)}</th>
+							{this.getCrossCell()}
+						</tr>
+						<tr>
+							<th colSpan='5'>НДС:</th><th>{specData.tax?.toFixed(2)}</th>
+							{this.getCrossCell()}
+						</tr>
+						<tr>
+							<td colSpan='6' style={{textAlign:'end'}}>{specData.taxInWords || ''}</td>
+							{this.getCrossCell()}
+						</tr>
+						<tr>
+							<th colSpan='5'>Итого:</th><th>{specData.sumPrice?.toFixed(2)}</th>
+							{this.getCrossCell()}
+						</tr>
+						<tr>
+							<td colSpan='6' style={{textAlign:'end'}}>{specData.sumPriceInWords || ''}</td>
+							{this.getCrossCell()}
+						</tr>
 					</tfoot>
 				</table>
 				<button

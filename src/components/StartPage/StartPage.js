@@ -63,10 +63,7 @@ export default class StartPage extends React.Component {
 		for (let key in this.state.specData) {
 			data[key] = this.state.specData[key];
 		}
-		// else {
-		// 	data = this.state[`${docName}Data`]
-		// }
-		console.log(data);
+
 		return axios({
 			method: 'post',
 			url: `/generate${this.formatName(docName)}`,

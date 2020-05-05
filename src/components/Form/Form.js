@@ -87,7 +87,8 @@ export default class Form extends React.Component {
 											this.handleInputChange(e);
 											this.setButtonStatus();
 										}}
-										value={data[param.key] || ''}/>
+										value={data[param.key] || ''}
+									/>
 								</label>
 							)
 						})
