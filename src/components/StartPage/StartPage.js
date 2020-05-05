@@ -134,7 +134,6 @@ export default class StartPage extends React.Component {
 					<ReportList pageState={this.state} pageSetState={this.pageSetState} deleteParams={this.deleteParams} />
 				</section>
 				<div style={{borderTop:'4px solid darkgrey'}}>
-					<div>этот раздел находится в разработке</div>
 					<Table pageState={this.state} pageSetState={this.pageSetState} getDoc={this.getDoc}/>
 					<button type="button" onClick={e => this.getDoc('ks2')}>
 						Скачать КС-2
