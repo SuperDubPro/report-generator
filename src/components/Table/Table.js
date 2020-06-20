@@ -172,6 +172,15 @@ export default class Table extends React.Component {
 			case 'number':
 			case 'quantity':
 			case 'unitPrice':
+				if(value[value.length-1] === '.') return;
+				// if(value[value.length-1] === ',') return;
+				// if(value[value.length-2] === ',') {
+				// 	const i = value.length-2;
+				// 	let arr = value.split('');
+				// 	arr[i] = '.';
+				// 	value[i] = arr.join('');
+				// 	return;
+				// }
 				value = parseFloat(value);
 			case 'measure':
 			case 'name':
@@ -362,11 +371,11 @@ export default class Table extends React.Component {
 			const key = `${sectionNum} ${subsectionNum} ${rowNum}`;
 			return (
 				<tr key={key}>
-					<td>{this.getEditableContentTag(row.number, `${key} number table-input`,parseFloat(row?.number) || '')}</td>
+					<td>{this.getEditableContentTag(row.number, `${key} number table-input`, row?.number || '')}</td>
 					<td>{this.getEditableContentTag(row.name, `${key} name table-input`)}</td>
 					<td>{this.getEditableContentTag(row.measure, `${key} measure table-input`)}</td>
-					<td>{this.getEditableContentTag(row.quantity, `${key} quantity table-input`,parseFloat(row?.quantity) || '')}</td>
-					<td>{this.getEditableContentTag(row.unitPrice, `${key} unitPrice table-input`, parseFloat(row?.unitPrice) || '')}</td>
+					<td>{this.getEditableContentTag(row.quantity, `${key} quantity table-input`, row?.quantity || '')}</td>
+					<td>{this.getEditableContentTag(row.unitPrice, `${key} unitPrice table-input`, row?.unitPrice || '')}</td>
 					<td>{row?.sumPrice.toFixed(2)}</td>
 					{this.getCrossCell(`delete-row ${key}`)}
 				</tr>
