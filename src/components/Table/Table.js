@@ -9,10 +9,11 @@ import { default as Icon } from '../Icon';
 import ContentEditable from 'react-contenteditable';
 
 const TAX = 0.20;
-const RELATED_EXPANSES = 0.08;
+// const RELATED_EXPANSES = 0.08;
 const MAX_SECTIONS_LENGTH = 8;
 
 export default class Table extends React.Component {
+
 	componentDidMount() {
 		let sections = [
 			new Section([
@@ -27,7 +28,7 @@ export default class Table extends React.Component {
 
 		const sectionsSumPrice = this.getSumPrice(sections);
 		const sectionsSumPriceInWords = this.getNumInWords(sectionsSumPrice);
-		const relatedExpanses = sectionsSumPrice * RELATED_EXPANSES;
+		const relatedExpanses = this.getSumPrice(sections,'relatedExpanses');
 		const sumPriceTaxFree = sectionsSumPrice + relatedExpanses;
 		const sumPriceTaxFreeInWords = this.getNumInWords(sumPriceTaxFree);
 		const tax = sumPriceTaxFree * TAX;
@@ -61,9 +62,10 @@ export default class Table extends React.Component {
 		this.props.pageSetState('specData', specData)
 	}
 
-	getSumPrice(arr) {
+	getSumPrice(arr, key) {
+		if(!key) key = 'sumPrice';
 		return arr.reduce((acc, val) => {
-			return acc + val.sumPrice;
+			return acc + val[key];
 		}, 0);
 	}
 
@@ -197,6 +199,11 @@ export default class Table extends React.Component {
 				break;
 			case 'section-price':
 				section.priceRow = value;
+			case 'relatedExpansesPerc':
+				if(value[value.length-1] === '.') return;
+				section.relatedExpansesPerc = parseFloat(value);
+				this.updateSectionSumPrice(section);
+				this.updateSumPrices(specData);
 				break;
 		}
 
@@ -297,7 +304,8 @@ export default class Table extends React.Component {
 	updateSumPrices(data) {
 		data.sectionsSumPrice = this.getSumPrice(data.sections);
 		data.sectionsSumPriceInWords = this.getNumInWords(data.sectionsSumPrice);
-		data.relatedExpanses = data.sectionsSumPrice * RELATED_EXPANSES;
+		// data.relatedExpanses = data.sectionsSumPrice * this.state.relatedExpanses;
+		data.relatedExpanses = this.getSumPrice(data.sections,'relatedExpanses');
 		data.sumPriceTaxFree = data.sectionsSumPrice + data.relatedExpanses;
 		data.sumPriceTaxFreeInWords = this.getNumInWords(data.sumPriceTaxFree);
 		data.tax = data.sumPriceTaxFree * TAX;
@@ -312,8 +320,9 @@ export default class Table extends React.Component {
 	}
 
 	updateSectionSumPrice(section) {
-		section.sumPrice = this.getSumPrice(section.subsections);
-		section.relatedExpanses = section.sumPrice * RELATED_EXPANSES;
+		section.subsectionsSumPrice = this.getSumPrice(section.subsections);
+		section.relatedExpanses = section.subsectionsSumPrice * section.relatedExpansesPerc / 100;
+		section.sumPrice = section.subsectionsSumPrice + section.relatedExpanses;
 	}
 
 	updateSubsectionSumPrice(subsection) {
@@ -338,9 +347,9 @@ export default class Table extends React.Component {
 	}
 
 	getSubsections(sectionNum) {
-		const specData = this.props.pageState.specData;
-		const sections = specData.sections;
-		return sections[sectionNum].subsections.map((subsection, subsectionNum) => {
+			const specData = this.props.pageState.specData;
+			const sections = specData.sections;
+			return sections[sectionNum].subsections.map((subsection, subsectionNum) => {
 			const key = `${sectionNum} ${subsectionNum} ${null}`;
 			return (
 				<>
@@ -427,6 +436,15 @@ export default class Table extends React.Component {
 											{this.getCrossCell(`delete-section ${sectionNum} ${null} ${null}`)}
 										</tr>
 										{this.getSubsections(sectionNum)}
+										<tr>
+											<th colSpan='5' className='align-left'>Стоимость работ:</th><th>{section.subsectionsSumPrice?.toFixed(2)}</th>
+											{this.getCrossCell()}
+										</tr>
+										<tr>
+											<th colSpan='2' className='align-left'>Сопутствующие расходы %:</th><th >{this.getEditableContentTag(section.relatedExpansesPerc, `${sectionNum} ${null} ${null} relatedExpansesPerc table-input`)}</th>
+											<th colSpan='2' className='align-left'>Сопутствующие расходы:</th><th >{section.relatedExpanses?.toFixed(2)}</th>
+											{this.getCrossCell()}
+										</tr>
 										<tr>
 											<th colSpan='5'>{this.getEditableContentTag(section.priceRow, `${sectionNum} ${null} ${null} section-price table-input`)}</th><th>{section.sumPrice?.toFixed(2)}</th>
 											{this.getCrossCell()}

@@ -1,10 +1,13 @@
 export default class Section {
-	constructor(subsections, title, priceRow) {
+	constructor(subsections, title, priceRow, relatedExpansesPerc) {
 		this.subsections = subsections;
-		this.sumPrice = this.sectionPrice();
+		this.subsectionsSumPrice = this.sectionPrice();
 		this.title = title || '';
 		this.priceRow = priceRow || 'Итого по разделу';
-		this.relatedExpanses = this.sumPrice * 0.08;
+		// this.relatedExpanses = 0;
+		this.relatedExpansesPerc = relatedExpansesPerc || 8;
+		this.relatedExpanses = this.subsectionsSumPrice * this.relatedExpansesPerc / 100;
+		this.sumPrice = this.subsectionsSumPrice + this.relatedExpanses;
 	}
 
 	sectionPrice() {
