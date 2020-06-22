@@ -67,6 +67,7 @@ function setSectionsMapping(sections, outputObj) {
 		outputObj[`section${sectionNum}_sumPrice`] = section.sumPrice;
 		outputObj[`section${sectionNum}_priceRow`] = section.priceRow;
 		outputObj[`section${sectionNum}_relatedExpanses`] = section.relatedExpanses;
+		outputObj[`section${sectionNum}_relatedExpansesPerc`] = section.relatedExpansesPerc;
 		section.subsections.forEach((subsection, subsectionNum) => {
 			outputObj[`section${sectionNum}_subsection${subsectionNum}_title`] = subsection.title;
 			outputObj[`section${sectionNum}_subsection${subsectionNum}_sumPrice`] = subsection.sumPrice;

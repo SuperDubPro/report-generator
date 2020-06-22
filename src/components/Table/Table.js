@@ -29,11 +29,13 @@ export default class Table extends React.Component {
 		const sectionsSumPrice = this.getSumPrice(sections);
 		const sectionsSumPriceInWords = this.getNumInWords(sectionsSumPrice);
 		const relatedExpanses = this.getSumPrice(sections,'relatedExpanses');
-		const sumPriceTaxFree = sectionsSumPrice + relatedExpanses;
+		// const sumPriceTaxFree = sectionsSumPrice + relatedExpanses;
+		const sumPriceTaxFree = sectionsSumPrice;
 		const sumPriceTaxFreeInWords = this.getNumInWords(sumPriceTaxFree);
 		const tax = sumPriceTaxFree * TAX;
 		const taxInWords = this.getNumInWords(tax) || '';
-		const sumPrice = sectionsSumPrice + relatedExpanses + tax;
+		// const sumPrice = sectionsSumPrice + relatedExpanses + tax;
+		const sumPrice = sectionsSumPrice + tax;
 		const sumPriceInWords = this.getNumInWords(sumPrice) || '';
 		const sumPriceHALF = this.getNumHalf(sumPrice,'big') || '';
 		const sumPriceHalf = this.getNumHalf(sumPrice,'small') || '';
@@ -306,11 +308,13 @@ export default class Table extends React.Component {
 		data.sectionsSumPriceInWords = this.getNumInWords(data.sectionsSumPrice);
 		// data.relatedExpanses = data.sectionsSumPrice * this.state.relatedExpanses;
 		data.relatedExpanses = this.getSumPrice(data.sections,'relatedExpanses');
-		data.sumPriceTaxFree = data.sectionsSumPrice + data.relatedExpanses;
+		// data.sumPriceTaxFree = data.sectionsSumPrice + data.relatedExpanses;
+		data.sumPriceTaxFree = data.sectionsSumPrice;
 		data.sumPriceTaxFreeInWords = this.getNumInWords(data.sumPriceTaxFree);
 		data.tax = data.sumPriceTaxFree * TAX;
 		data.taxInWords = this.getNumInWords(data.tax) || '';
-		data.sumPrice = data.sectionsSumPrice + data.relatedExpanses + data.tax;
+		// data.sumPrice = data.sectionsSumPrice + data.relatedExpanses + data.tax;
+		data.sumPrice = data.sectionsSumPrice + data.tax;
 		data.sumPriceInWords = this.getNumInWords(data.sumPrice) || '';
 		data.sumPriceHALF = this.getNumHalf(data.sumPrice,'big') || '';
 		data.sumPriceHalf = this.getNumHalf(data.sumPrice,'small') || '';
@@ -400,8 +404,8 @@ export default class Table extends React.Component {
 				onChange={e => this.handleCellChange(e)}
 				id={className}
 				html={
-					variable
-						? `<div>${value ? value : ' '}</div>`
+					(variable || variable === 0)
+						? `<div>${(value || value === 0) ? value : ' '}</div>`
 						: `<br/>`
 				}
 			/>
